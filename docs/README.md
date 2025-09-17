@@ -141,6 +141,8 @@ export OCTAVE_FIG_HEIGHT=480
 
 Politika uyarısı: `force: true` isteği, ortamda `MCP_ALLOW_FORCE_DELETE=true` değilse engellenir ve anlamlı bir hata yanıtı döner.
 
+Standart hata bloğu şeması için bkz: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
+
 ## Testler
 
 Projedeki sözleşme ve entegrasyon testleri doğrulanmıştır.
@@ -202,6 +204,7 @@ LM Studio `mcpServers` yapılandırma örneği:
 ```
 
 MCP Araçları ve Parametreler:
+
 - `octave_run`:
   - `code` (str), `session_id` (opsiyonel), `images_b64` (bool), `max_image_bytes` (int)
   - `images_b64` true ise, boyut limiti altındaki görseller base64 olarak döner.
