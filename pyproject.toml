@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+
+[project]
+name = "octave-mcp-server"
+version = "0.2.0"
+requires-python = ">=3.11"
+description = "Octave MCP Server with HTTP + STDIO, publish/grabcode, rate limiting"
+readme = "README.md"
+
+
