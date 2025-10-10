@@ -28,7 +28,10 @@ _cleanup_service = CleanupService(
 
 @mcp.tool(
     name="octave_run",
-    description=("Octave veya Python ile kod çalıştırır; stdout/stderr ve " "görselleri döndürür."),
+    description=(
+        "Octave veya Python ile kod çalıştırır; stdout/stderr ve "
+        "görselleri döndürür."
+    ),
 )
 def tool_run(
     code: Annotated[str, "Çalıştırılacak Python/Octave kodu"],
