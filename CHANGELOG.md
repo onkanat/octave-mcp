@@ -19,6 +19,10 @@
 - Dokümantasyon: README ve API dokümanları yeni bayraklar, ortam değişkenleri
   ve kullanım örnekleriyle güncellendi.
 
+## v0.2.1 (2025-10-11)
+
+- Küçük hata düzeltmeleri, formatlama ve CI yapılandırma iyileştirmeleri.
+
 ## v0.1.0 (ilk sürüm)
 
 - Proje iskeleti, model, servis, test ve API/CLI uç noktaları oluşturuldu.
