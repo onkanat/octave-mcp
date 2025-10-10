@@ -9,16 +9,19 @@ from .store import session_code_store
 
 
 class PublishService:
-    def publish(self, code: str, session_id: str | None, options: dict | None = None) -> Dict:
+    def publish(self, code: str, session_id: str | None,
+                options: dict | None = None) -> Dict:
         if session_id:
             session_code_store[session_id] = code
 
-        runs_root = get_env_str("MCP_RUNS_ROOT", os.path.abspath("runs")) or os.path.abspath("runs")
+        runs_root = get_env_str("MCP_RUNS_ROOT",
+                                os.path.abspath("runs")) or os.path.abspath("runs")
         session_folder = session_id or "anonymous"
         publish_dir = os.path.join(runs_root, session_folder, "published")
         os.makedirs(publish_dir, exist_ok=True)
 
-        # Hazır görselleri (varsa) topla: runs_root altındaki en yeni octave_run_* klasöründen fig_*.png
+        # Hazır görselleri (varsa) topla: runs_root altındaki en yeni octave_run_*
+        # klasöründen fig_*.png
         images_relpaths = []
         try:
             candidates = []
