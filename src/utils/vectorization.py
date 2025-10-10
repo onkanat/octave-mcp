@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from typing import List, Optional
+from typing import List
 
 
 class VectorizationIssue:

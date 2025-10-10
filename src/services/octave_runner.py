@@ -98,7 +98,7 @@ class OctaveRunner:
                     stdout = proc.stdout
                     stderr = proc.stderr
                     exit_code = proc.returncode
-                except Exception as e:
+                except Exception:
                     # Geri düşüş de başarısızsa, ilk hata korunur
                     pass
         except subprocess.TimeoutExpired as e:
