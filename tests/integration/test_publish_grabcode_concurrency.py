@@ -6,8 +6,7 @@ from fastapi.testclient import TestClient
 
 from api.endpoints import app
 
-sys.path.insert(0, os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 
 def publish_code(client, session_id, code):
