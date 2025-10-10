@@ -23,6 +23,8 @@ jobs:
           source .venv/bin/activate
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
+          # install the package in editable mode so tests can import `api` etc.
+          python -m pip install -e .
           python -m pip install black isort flake8
 
       - name: Set up Node.js
