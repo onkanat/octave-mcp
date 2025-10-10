@@ -23,6 +23,10 @@
 
 - Küçük hata düzeltmeleri, formatlama ve CI yapılandırma iyileştirmeleri.
 
+## v0.2.2 (2025-10-11)
+
+- Küçük düzeltme: top-level import uyumluluğu için `octave_mcp` shim eklendi.
+
 ## v0.1.0 (ilk sürüm)
 
 - Proje iskeleti, model, servis, test ve API/CLI uç noktaları oluşturuldu.
