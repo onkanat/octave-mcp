@@ -4,12 +4,7 @@ import sys
 
 from fastapi.testclient import TestClient
 
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "../../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 
 def test_run_octave_includes_error_block_on_failure():

@@ -5,12 +5,7 @@ import threading
 
 from fastapi.testclient import TestClient
 
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "../../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 
 def publish_code(client, session_id, code):
@@ -30,9 +25,7 @@ def test_publish_grabcode_concurrency():
     threads = []
     # Her session için publish işlemini başlat
     for session_id, code in session_codes.items():
-        t = threading.Thread(
-            target=publish_code, args=(
-                client, session_id, code))
+        t = threading.Thread(target=publish_code, args=(client, session_id, code))
         threads.append(t)
         t.start()
     for t in threads:
@@ -42,9 +35,7 @@ def test_publish_grabcode_concurrency():
     result_dict = {}
     threads = []
     for session_id in session_codes:
-        t = threading.Thread(
-            target=grab_code, args=(
-                client, session_id, result_dict))
+        t = threading.Thread(target=grab_code, args=(client, session_id, result_dict))
         threads.append(t)
         t.start()
     for t in threads:
