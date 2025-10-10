@@ -1,15 +1,20 @@
-# Octave MCP Server
+# Octave MCP Server v0.2.0
+
+[English Version](./en/index.md)
 
 Yerel Octave kurulumunuz üzerinde güvenli komut çalıştıran bir MCP sunucusu.
 
 ## Özellikler
-- STDIO ve HTTP API ile Octave/Python kodu çalıştırma
-- publish/grabcode ile HTML çıktı ve kaynak kod geri alma
-- Figür yakalama: Oluşan `fig_*.png` görsellerini kalıcı olarak saklama ve publish HTML’e gömme
-- MCP (STDIO) köprüsü: `octave_run`, `octave_publish`, `octave_grabcode`, `admin_cleanup` araçları
-- Kaynak limiti, hata raporu, persistent session desteği
+
+- **FastMCP + FastAPI**: STDIO MCP ve HTTP API desteği
+- **Octave kod çalıştırma**: Resource limit, timeout ve hata raporlama
+- **Publish/Grabcode**: HTML çıktı üretimi ve kaynak kod geri alma
+- **Session yönetimi**: Kalıcı çalışma dizinleri ve otomatik temizlik
+- **Figür yakalama**: PNG görsellerini otomatik toplama ve HTML'e gömme
+- **Rate limiting**: HTTP API için istek sınırlandırması
 
 ## Kurulum
+
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
@@ -17,13 +22,17 @@ pip install -r requirements.txt
 ```
 
 ## Octave ile Devreye Alma
+
 Sunucunun Octave ile çalışabilmesi için sisteminizde GNU Octave kurulu olmalıdır. Aşağıdaki komutla yükleyebilirsiniz:
 
 macOS:
+
 ```sh
 brew install octave
 ```
+
 Ubuntu/Debian:
+
 ```sh
 sudo apt-get install octave
 ```
@@ -179,15 +188,15 @@ LM Studio `mcpServers` yapılandırma örneği:
 {
   "mcpServers": {
     "octave_execute": {
-      "command": "/Users/hakankilicaslan/Prompts/mcp_new/.venv/bin/python",
+      "command": "/path/to/octave-mcp/.venv/bin/python",
       "args": [
-        "/Users/hakankilicaslan/Prompts/mcp_new/src/mcp_server.py"
+        "/path/to/octave-mcp/src/mcp_server.py"
       ],
       "env": {
         "PYTHONUNBUFFERED": "1",
         "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}",
-        "MCP_RUNS_ROOT": "/Users/hakankilicaslan/Prompts/mcp_new/runs",
-        "TMPDIR": "/Users/hakankilicaslan/Prompts/mcp_new/runs",
+        "MCP_RUNS_ROOT": "/path/to/octave-mcp/runs",
+        "TMPDIR": "/path/to/octave-mcp/runs",
         "OCTAVE_RUNNER_MODE": "python",
         "MCP_IS_VISION_MODEL": "false",
         "MCP_RATE_LIMIT_MAX": "100",
@@ -276,7 +285,7 @@ Hızlı bir uçtan uca demo için hazır betiği çalıştırabilirsiniz:
 source .venv/bin/activate
 python scripts/mcp_demo_flow.py
 ```
- 
+
 Bu betik örnek kodu publish eder, ardından grabcode ile geri alır ve `octave_run` aracını `images_b64=true` ile çağırıp görsel çıktıları base64 olarak da gösterir.
 
 Alternatif olarak hızlı bir kontrol betiği:

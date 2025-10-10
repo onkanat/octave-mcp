@@ -78,6 +78,7 @@ src/services/**/__pycache__/
 
 # Tooling/local state
 .specify/
-
+specific_backup.txt
+specific.txt
 # Environment examples should remain
 !.env.example

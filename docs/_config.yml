@@ -1,0 +1,37 @@
+theme: minima
+title: "OctaveMCP"
+description: "GNU Octave MCP Server with FastMCP + FastAPI"
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+markdown: kramdown
+highlighter: rouge
+
+# Navigation
+header_pages:
+  - index.md
+  - README.md
+  - API.md
+  - MCP_TOOLS.md
+  - ERROR_SCHEMA.md
+  - en/index.md
+  - en/API.md
+  - en/MCP_TOOLS.md
+  - en/ERROR_SCHEMA.md
+  - LICENSE.md
+
+# Site settings
+author: 
+  name: "OctaveMCP"
+  
+github:
+  repository_url: https://github.com/onkanat/octave-mcp
+
+# Exclude files from processing
+exclude:
+  - "*.backup.md"
+  - "*_old.md"
+  - "*_new.md"

@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install black isort flake8
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: |
+          npm --version
+          npm install -g markdownlint-cli@0.41.0
+
+      - name: Markdown lint
+        run: |
+          markdownlint \
+            README.md \
+            CHANGELOG.md \
+            RELEASE_NOTES.md \
+            docs/**/*.md
+
+      - name: Lint (black, isort, flake8)
+        run: |
+          source .venv/bin/activate
+          black --check .
+          isort --check-only .
+          flake8 .
+
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          pytest -q

@@ -1,0 +1,7 @@
+include README.md
+include CHANGELOG.md
+include LICENSE
+include install.sh
+include requirements.txt
+recursive-include docs *
+recursive-include specs *

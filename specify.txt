@@ -1,472 +1,74 @@
-# GitHub Copilot Rehberi (Octave MCP)
+# Octave MCP Server - Copilot Kılavuzu
 
-Bu belge `ROADMAP.md` ve `optimizasyon-prompt.md` içeriklerinin birleştirilmiş, Copilot / LLM yönlendirmesine uygun özetlenmiş sürümüdür. Amaç: Kod üretirken bağlamı, öncelikleri ve kalite kurallarını tek noktadan beslemek.
+**Versiyon**: 0.2.0 | **Teknoloji Stack**: Python 3.11+, FastMCP + FastAPI, GNU Octave, MCP
 
----
-## 1. Mevcut Mimari & Özellikler
+## Proje Mimarisi
 
-Çekirdek bileşenler:
-- MCP STDIO: `mcp_server.py` araçlar: `run_octave`, `publish_octave`, `grabcode_octave`, `clean_octave`
-- HTTP API: `mcp_octave_server.py` (`/run`, `/publish`, `/grabcode`, `/cleanup`, alias `/mcp`)
-- Yürütme: `octave_exec.py` (geçici veya session bazlı run klasörü, resource limit)
-- Modeller: `models.py` (Run / Publish / Grabcode şemaları)
-- Yardımcılar: `utils.py` (resource limit, wrapper script, görsel toplama)
-- Prompt: `octave_system_message.txt` (Octave-only + publish/grabcode kuralları)
-- Test: `smoke_test.py` (publish+grabcode zinciri)
+**Çekirdek Modüller** (src/ altında):
+- `mcp_server.py`: FastMCP ile MCP STDIO araçları (octave_run, publish_octave, grabcode_octave, clean_octave)
+- `api/endpoints.py`: FastAPI ile HTTP API (/run, /publish, /grabcode, /cleanup)
+- `services/`: octave_runner, publish_service, grabcode_service, cleanup_service
+- `models/`: Run, Publish, Grabcode, ImageResult veri modelleri
+- `utils/`: resource_limits, config, error_format, logging
 
-Özellikler:
-- Publish: HTML çıktı + base64 + truncation uyarısı
-- Grabcode: HTML'den kaynak geri çıkarma (char(10) join) 
-- Resource limit: CPU süresi, bellek, timeout, stdout/stderr truncation
-- session_id ile kalıcı run dizinleri → sonradan grabcode
+**Temel Özellikler**:
+- Kod çalıştırma: session tabanlı, resource limit, timeout
+- Publish: HTML çıktı + base64, truncation uyarısı
+- Grabcode: HTML'den kaynak geri çıkarma
+- Cleanup: otomatik eski session temizliği
 
-Tamamlanan son iyileştirmeler:
-- Publish & grabcode driver yeniden yazımı (newline hataları çözüldü)
-- Grabcode relatif yol ve stabil kod birleşimi
-- Prompt ve README genişletildi (iş akışı & hata teşhis)
+## Kod Üretim Kuralları
 
----
-## 2. Yakın / Orta / Uzak Vadeli Hedefler
+**GNU Octave Uyumluluğu**:
+- MATLAB özel API kullanma; sadece GNU Octave sözdizimi
+- Vektörizasyon zorunlu; gereksiz döngü yasak
+- Element işlemler: `.*`, `./`, `.^` (nokta notasyonu)
+- Grafik kaydetme: `print('-dpng','figure.png','-r150')`
+- Deterministik rastgelelik: `rand("seed",0)`
+- `input()` fonksiyonu yasak
 
-### Yakın (v0.2.0)
-Performans & Hata Ayıklama
-- Persistent Octave süreç modu (opsiyonel; default izolasyon)
-- Gelişmiş hata bloğu: identifier, message, stack (file:line func) + otomatik ipucu
-- Yanıtlarda "run_receipt" özeti
-
-Görselleştirme
-- publish için max_figures, dpi parametreleri
-- Büyük veri (>100k nokta) için downsampling uyarısı
-
-Paket Bilinci
-- `list_octave_packages`, `find_octave_package`
-- Prompt: fonksiyon yok → paket kontrol akışı
-
-Kalite & Güvenlik
-- `/run` rate limit (hafif token bucket)
-- Resource profil şablonları (safe / balanced / perf)
-
-Dokümantasyon
-- Persistent mod & paket rehberi ekleme
-
-### Orta (v0.3.x)
-- Firejail / container sandbox (ağ kapalı, whitelist workdir)
-- İş kuyruğu + iptal API + paralel worker havuzu
-- Hata sınıflandırma ve otomatik düzeltme ipuçları
-- Performans telemetri (opsiyonel)
-- HTML publish daha hafif tema / kod gizleme flag
-- Çoklu script bloğu (grabcode) desteği (yayın motoru desteklerse)
-
-### Uzak (v0.4.x+)
-- Dağıtık yürütme & merkezi kuyruk
-- Çıktı/sonuç önbelleği (kod hash)
-- Gelişmiş paket yönetimi (on‑demand kurulum, hash doğrulama)
-- Web IDE canlı plot
-- Tam dosya sistemi sanallaştırma & politika
-- İçerik denetimi (eval/system pattern uyarıları)
-
-Sürüm Etiketleri Taslak:
-- v0.1.x: run/publish/grabcode temel
-- v0.2.0: persistent, hata raporu, paket araçları, run_receipt
-- v0.3.0: sandbox, paralel worker, downsampling otomasyonu
-- v0.4.0+: dağıtık, önbellek, gelişmiş güvenlik
-
----
-## 3. Optimizasyon Önerileri (Özet)
-
-### 3.1 Persistent Süreç
-Problem: Her çağrıda yeni süreç açma ~300–800 ms gecikme.
-Çözüm: Opsiyonel tek Octave child; stdin komut + sentinel (`__MCP_DONE__`). Güvenlik: varsayılan kapalı.
-
-### 3.2 Hata Raporlama
-Standart blok: `---MCP_ERROR_START---` / `---MCP_ERROR_END---` → identifier, message, stack satırları `file:line (func)` + ipucu heuristik.
-
-### 3.3 Vektörizasyon Zorunluluğu
-Kötü (loop) vs İyi (vektörize) örnekleri prompt’a yerleştir. 15+ satırlık loop tespitinde uyarı üret.
-
-### 3.4 Paket Bilinci
-Araçlar: `list_octave_packages`, `find_octave_package`. Fonksiyon yoksa: paket kontrol → kullanıcıya öneri.
-
-### 3.5 Sandbox
-Firejail (Linux): `--private --net=none --whitelist=<workdir>`. Persistent mod sandbox yoksa devre dışı.
-
-### 3.6 Grafik & Veri Optimizasyonu
-Downsampling kuralı: >1e6 nokta → örnekle (<=10k). Çözünürlük default -r100; yüksek DPI kullanıcı talebi ile.
-
----
-## 4. Prompt Entegrasyonu (Sistem Mesajına Eklenmesi Gerekenler)
-
-1. Persistent mod açıklaması (opsiyonel, güvenlik uyarısı)
-2. Hata formatı ve stack trace zorunluluğu
-3. Vektörizasyon zorunlu kuralı + örnek bloklar
-4. Paket bulunamadı akışı (list/find araçları)
-5. Grafik optimizasyon kuralları (downsampling & DPI)
-
----
-## 5. Kod Üretim Kuralları (Copilot İçin Hatırlatma)
-
-- Yalnızca GNU Octave uyumlu sözdizimi; MATLAB özel API yok.
-- Vektörize et; gereksiz döngü kullanma.
-- Çarpma işaretini açık yaz (2*x), element işlemlerinde .*, ./, .^.
-- Grafik kaydetme: `print('-dpng','figure.png','-r150')` (varsayılan) veya düşük DPI (-r100) büyük veri uyarısı varsa.
-- Rastgelelik: `rand("seed",0)` ile deterministik oluştur.
-- input kullanma; tüm parametreleri başta ata.
-- publish senaryosunda show_code gerekli ise True.
-- Kod örneği gösterildiği gibi çalıştırılmalı (run/publish); değiştirme.
-
----
-## 6. Geliştirme Sırasında Önceliklendirme Heuristiği
-
-Önce: Güvenlik & tutarlılık > Hata raporu > Performans > Kullanıcı deneyimi > Ek özellikler.
-
-Karar çatışmasında persistent mod güvenlik riskine karşı kapat (fallback spawn modu).
-
----
-## 7. Örnek Vektörizasyon Bölümü (Prompt İçin Kopyala)
-
-**Kötü (Loop):**
+**Vektörizasyon Örneği**:
 ```octave
-x = 0:0.1:10;
-y = zeros(size(x));
-for i=1:length(x)
-  y(i) = sin(x(i)^2);
-endfor
-```
+% KÖTÜ:
+for i=1:length(x); y(i) = sin(x(i)^2); endfor
 
-**İyi (Vektörize):**
-```octave
-x = 0:0.1:10;
+% İYİ:
 y = sin(x.^2);
 ```
 
----
-## 8. Gelecek Genişlemeler İçin Notlar
+**Resource Limit Kuralları**:
+- CPU: 10s default, bellek: 512MB default
+- Çıktı truncation: 20k karakter, resim: 5MB
+- Timeout: 30s subprocess
 
-- Çoklu script grabcode: publish çıktısında birden fazla kaynak bloğu parse.
-- Hata sınıflandırma modelleri (regex + basit rule engine) → öneri üret.
-- Kod hash önbelleği (deterministik sonuçlar için).
-- Telemetri (kümülatif CPU / ortalama runtime) sadece dev modda.
+## Hata Raporlama Formatı
 
----
-## 9. Sürüm Geçiş Kontrol Listesi (Release Checklist)
-
-Öncesi:
-- [ ] Tüm testler (smoke + ek) geçiyor
-- [ ] README & sistem prompt güncel
-- [ ] ROADMAP sürüm hedefleri güncellendi
-- [ ] Güvenlik limitleri (CPU/memory) doğrulandı
-- [ ] Yeni araçların dokümantasyonu eklendi
-
-Sonrası:
-- [ ] Tag oluşturuldu (örn. v0.2.0)
-- [ ] Değişiklik özeti (CHANGELOG veya README bölümü)
-- [ ] Geriye dönük uyumluluk notları eklendi
-
----
-## 10. Hızlı Referans
-
-| Alan | Anlam |
-|------|-------|
-| success | exit_code==0 |
-| html_b64 | publish HTML (truncation kontrolü) |
-| code_b64 | grabcode kaynak kodu |
-| images[] | PNG figür listesi |
-| run_receipt (planlı) | Kısa özet + metrik |
-
----
-Son.
----
-# Octave MCP Server (FastAPI + STDIO MCP)
-
- Yerel Octave kurulumunuz üzerinde güvenli komut çalıştıran bir MCP sunucusu. Arayüzler:
-
-- STDIO MCP sunucusu: `mcp_server.py` (LLM/MCP istemcileri için)
-- HTTP API: `mcp_octave_server.py` `/run`, `/publish`, `/grabcode` ve alias `/mcp` uç noktaları (opsiyonel)
-
-Daha fazla mimari ve plan: bkz. `ROADMAP.md`.
-
-## Bileşenler
-
-- `octave_exec.py`: Octave kodunu geçici dizinde çalıştırır, stdout/stderr/exit_code ve PNG figürleri döndürür.
-- `mcp_server.py`: `fastmcp` ile MCP STDIO araçları: `run_octave`, `publish_octave`, `grabcode_octave`, `clean_octave`.
-- `mcp_octave_server.py`: FastAPI HTTP sunucusu; `/run`, `/publish`, `/grabcode` ve alias `/mcp`.
-- `models.py`: Ortak istek/yanıt modelleri (`Run*`, `Publish*`, `Grabcode*`, `ImageResult`).
-- `utils.py`: Ortak yardımcılar (`apply_resource_limits`, `make_wrapper_script`, `collect_images`).
-- `clean_octave.py`: Eski oturum/run klasörlerini temizlemek için yardımcı komut.
-- `smoke_test.py`: Yerel hızlı doğrulama testi (publish & grabcode dahil).
-
-## Önkoşullar
-
-- macOS için Octave kurulu olmalı (Homebrew): `brew install octave`
-- Python 3.11+ (bu repo 3.13 ile test edilmiştir)
-
-## Kurulum
-
-```zsh
-# (İsteğe bağlı) Sanal ortam
-python3 -m venv venv
-source venv/bin/activate
-
-# Bağımlılıklar
-python -m pip install -r requirements.txt
+Standart blok yapısı:
+```
+---MCP_ERROR_START---
+identifier: OCTAVE_SYNTAX_ERROR
+message: Sözdizimi hatası tespit edildi
+stack: script.m:5 (main function)
+ipucu: Satır sonuna ';' ekleyin
+---MCP_ERROR_END---
 ```
 
-## Kullanım
-
-### 1) STDIO MCP sunucusu
-
-MCP istemcileri (ör. LM Studio, Claude Desktop) ile konuşan stdio sunucuyu başlatır:
-
-```zsh
-source venv/bin/activate
-python mcp_server.py
-```
-
-Kayıtlı STDIO araçları:
-
-- `run_octave(code|code_b64, filename=None, timeout=30, cpu_time_limit=10, memory_limit_mb=512, session_id=None)`
-- `publish_octave(code|code_b64, filename=None, format='html', show_code=True, include_images=True, max_html_chars=None, session_id=None, ...)` → Koddan HTML + (opsiyonel) PNG.
-- `grabcode_octave(session_id, html_relpath, timeout=30, ...)` → Publish edilmiş HTML'den kaynak kod çıkarır.
-- `clean_octave(hours=48, runs_root=None, dry_run=False)` → Eski run klasörlerini temizler.
-
-`run_octave` / `clean_octave` temel alanlar:
-
-- `success`, `stdout`, `stderr`, `exit_code`, `runtime_seconds`, `images` (PNG listesi)
-
-`publish_octave` ek alanlar:
-
-- `html_b64`, `html_truncated`, `html_original_size`, `html_name`, `publish_dir`
-
-`grabcode_octave` ek alanlar:
-
-- `code_b64`, `line_count`
-
-#### LM Studio ile STDIO entegrasyonu (önerilen)
-
-- Ayrı terminalde sunucu çalıştırmanıza gerek yok; LM Studio süreci kendisi başlatır.
-- macOS’ta GUI uygulamaları PATH’i miras almayabilir; Octave için PATH’i env’e ekleyin.
-
-```jsonc
-{
-  "mcpServers": {
-    "octave_execute": {
-      "command": "/userhome/Prompts/mcp_octave/venv/bin/python",
-      "args": ["/userhome/Prompts/mcp_octave/mcp_server.py"],
-      "env": {
-        "PYTHONUNBUFFERED": "1",
-        "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}"
-      },
-      "workingDirectory": "/userhome/Prompts/mcp_octave"
-    }
-  }
-}
-```
-
-Doğrulama: LM Studio tool listesinde `run_octave` görünecek; `code: disp("LMStudio test");` ile çağırdığınızda `success=true`, `exit_code=0` ve stdout’ta metni görürsünüz.
-
-### 2) HTTP API (opsiyonel)
-
-```zsh
-source venv/bin/activate
-uvicorn mcp_octave_server:app --host 127.0.0.1 --port 8000 --log-level info
-```
-
-#### `/run` örnek istek
-
-```zsh
-python - <<'PY'
-import requests
-r = requests.post('http://127.0.0.1:8000/run', json={
-  'code': 'd=10; r=d/2; alan=pi*r^2; disp(["Alan: ", num2str(alan)]);'
-})
-print(r.status_code)
-print(r.json())
-PY
-```
-
-Yanıt şeması:
-
-```json
-{
-  "success": true,
-  "stdout": "...",
-  "stderr": "...",
-  "exit_code": 0,
-  "runtime_seconds": 1.23,
-  "images": [
-    {"name": "figure_01.png", "mime": "image/png", "b64": "...", "size": 12345}
-  ]
-}
-```
-
-Uzun ya da kaçış sorunlu kodlar için `code_b64` kullanın (UTF-8’i Base64’e çevirin):
-
-```zsh
-python - <<'PY'
-import base64, requests
-code = """
-% x=0:0.01:10; y=sin(x.^2); plot(x,y); print('-dpng','out.png','-r150');
-"""
-b64 = base64.b64encode(code.encode()).decode()
-r = requests.post('http://127.0.0.1:8000/run', json={'code_b64': b64})
-print(r.json()['success'])
-PY
-```
-
-#### `/publish` örnek istek
-
-```zsh
-python - <<'PY'
-import requests
-code = "disp('Publish ornek'); x=1:5; y=x.^2; figure; plot(x,y);"
-r = requests.post('http://127.0.0.1:8000/publish', json={
-  'code': code,
-  'session_id': 'pubsess1',
-  'include_images': True
-})
-print(r.json().keys())
-PY
-```
-
-#### `/grabcode` örnek istek
-
-Önce publish cevabından `publish_dir` ve `html_name` alın (ör: `run_1723456789/published/script_publish.html` alt yolunu oluştur). Sonra:
-
-```zsh
-python - <<'PY'
-import requests
-relpath = 'run_1723456789/published/script_publish.html'  # örnek
-r = requests.post('http://127.0.0.1:8000/grabcode', json={
-  'session_id': 'pubsess1',
-  'html_relpath': relpath
-})
-print(r.json().get('line_count'))
-PY
-```
-
-### Publish & Grabcode İş Akışı (Detaylı)
-
-1. Publish çağır (MCP aracı `publish_octave` veya HTTP `/publish`). `session_id` vermezsen çalışma dizini otomatik silinir ve sonradan grabcode mümkün olmaz. Grabcode kullanmayı planlıyorsan mutlaka anlamlı bir `session_id` geçir.
-2. Publish cevabından şu alanları al: `publish_dir` (ör: `.../runs/mysess/run_1723456789/published`), `html_name` (ör: `script_publish.html`).
-3. `html_relpath` oluştur: `run_1723456789/published/script_publish.html` (yani session köküne göre görece yol).
-4. MCP `grabcode_octave` veya HTTP `/grabcode` endpoint’ine `{ session_id: 'mysess', html_relpath: 'run_.../published/script_publish.html' }` ile çağrı yap.
-5. Yanıt `code_b64` alanını döndürür; Base64 decode ederek orijinal script (publish sırasında kullanılan tam kaynak) elde edilir.
-
-Notlar:
-
-- HTML büyükse `max_html_chars` veya global `MAX_HTML_CHARS` kesme (truncate) uygulayabilir; kesilmişse `html_truncated=true` ve `warnings` alanı uyarı verir.
-- `grabcode_octave` hiçbir zaman ağ erişimi yapmaz; sadece aynı çalışma dizinindeki HTML’yi parse eder.
-- Birden fazla publish çalıştırırsan her biri farklı `run_<timestamp>` klasörü üretir; doğru run klasörünü seçtiğinden emin ol.
-
-#### Çıktı Alanları Özet
-
-- publish: `html_b64`, `html_truncated`, `html_original_size`, `publish_dir`, `images[]` (PNG), `warnings`.
-- grabcode: `code_b64`, `line_count`, `warnings`.
-
-#### Hata Teşhis İpuçları
-
-- `publish html not found`: publish başarılı (exit_code=0) olsa bile Octave publish() HTML üretmemiş olabilir; stdout/stderr incele.
-- grabcode `no code extracted`: HTML içinde `<pre class=\"code\">` veya beklenen kaynak blok bulunamadı (Octave sürüm farklılığı veya show_code=false?). `show_code=True` kullan.
-
-#### Temizlik endpoint’i
-
-```zsh
-python - <<'PY'
-import requests
-r = requests.post('http://127.0.0.1:8000/cleanup', json={
-  'hours': 48,
-  'runs_root': './runs',
-  'dry_run': True
-})
-print(r.status_code)
-print(r.json())
-PY
-```
-
-Örnek yanıt:
-
-```json
-{
-  "success": true,
-  "deleted_runs": 3,
-  "deleted_sessions": 1,
-  "runs_root": "/abs/path/to/runs",
-  "hours": 48,
-  "dry_run": true
-}
-```
-
-İsteğe bağlı sınırlar (per-request):
-
-- `max_output_chars`: stdout/stderr için karakter limiti (varsayılan env ya da 20000)
-- `max_image_size_bytes`: PNG dahil etme limiti (varsayılan env ya da 5MB)
-MCP stdio (run_octave) için isteğe bağlı kalıcılık:
-- `session_id`: Verilirse çalışma dizini `runs/<session_id>/run_<timestamp>` olur ve temizlik otomatik yapılmaz.
-
-Ortam değişkenleri ile genel sınırlar/log seviyesi:
-
-- `MAX_OUTPUT_CHARS` (int)
-- `MAX_IMAGE_SIZE_BYTES` (int)
-- `LOG_LEVEL` (DEBUG|INFO|WARNING|ERROR)
-
-Notlar:
-
-- `/mcp` alias, MCP’nin tam JSON-RPC stdio protokolü değildir; sadece `{ code, ... }` alanı bekleyen basit bir HTTP çalıştırıcıdır. Tam MCP için stdio yolunu kullanın.
-- Hem STDIO hem HTTP tarafında `code` yerine `code_b64` gönderebilirsiniz; sunucu otomatik çözer.
-- `GET /mcp` uç noktası basit bir bilgi ve istek şeması döndürür.
-
-## Test (Smoke)
-
-```zsh
-source venv/bin/activate
-python smoke_test.py
-```
-
-Beklenen çıktı:
-
-- `execute_octave`: örnek daire alanı hesaplaması, `exit_code=0`
-- `mcp tool`: `success=true`, `stdout` içinde "merhaba"
-
-## Güvenlik ve Sınırlar
-
-- Unix `resource` limitleri (CPU süresi, bellek, dosya boyutu) çocuk süreç için ayarlanır. macOS’ta mevcut hard limiti aşmadan yalnızca soft limit düşürülür.
-- `timeout` parametresi alt süreç için üst zaman sınırıdır.
-- Maksimum çıktı karakteri ve maksimum resim boyutu sınırlıdır.
-
-Hata mesajı sanitizasyonu: HTTP endpoint’leri beklenmedik hatalarda iç detayları gizler, sadece referans ID döner (detaylar log’larda).
-
-## Otomatik Temizlik (48 saat)
-
-Oturum klasörlerini temizlemek için yardımcı komut:
-
-```zsh
-python clean_octave.py --runs-root ./runs --hours 48 --verbose
-```
-
-Deneme (silmeden):
-
-```zsh
-python clean_octave.py --runs-root ./runs --hours 48 --dry-run --verbose
-```
-
-## Sorun Giderme
-
-- "octave: command not found": Octave kurulu değil; Homebrew ile kurun ve PATH’i doğrulayın (`which octave`).
-- "current limit exceeds maximum limit": macOS’ta hard limit yükseltilemez; bu repo varsayılan olarak soft limiti cap’ler (güncel kodda çözüldü).
-- HTTP `Connection refused`: Sunucunun çalıştığından emin olun ve doğru portu kullanın.
-- `/mcp` 405/422: Yanlış HTTP methodu veya beklenen `{ code: "..." }` gövdesi yok. Basit alias sadece code alanını kabul eder. Tam MCP için stdio kullanın.
-
-## Lisans
-
-Bu repo eğitim ve yerel kullanım amaçlıdır. Üçüncü taraf lisanslarına (GNU Octave vb.) uyun.
-
-## Değişiklik Özeti (Ağustos 2025)
-
-- Tekrarlayan kodlar ortak `utils.py` ve `models.py` altına taşındı.
-- FastAPI sunucusunda hem dosyaya hem konsola log, `LOG_LEVEL` ile kontrol.
-- `MAX_OUTPUT_CHARS` ve `MAX_IMAGE_SIZE_BYTES` hem env hem de istek bazında belirtilebilir oldu.
-- Hata mesajları sanitizasyonu: dahili ayrıntılar yerine referans ID.
-- Zaman aşımında alt süreçleri sonlandırmak için en iyi çaba (`pkill -f <script>`).
-- Yeni: `publish_octave` (HTML üretimi + truncation/base64) ve `grabcode_octave` (HTML'den kod çıkartma) araçları ile HTTP `/publish`, `/grabcode` endpointleri.
-- Publish & grabcode driver script'leri satır listesiyle üretilerek satır içi newline kaynaklı Octave sözdizim hataları giderildi.
-- Grabcode: relatif yol çözümü ve çok satırlı kaynak birleştirme `char(10)` ile düzeltilerek stabil hale getirildi.
+## Geliştirme Öncelikleri
+
+1. **Güvenlik & Tutarlılık** (resource limits, sandbox)
+2. **Hata Raporlama** (stack trace, otomatik ipucu)
+3. **Performans** (persistent mode opsiyonel)
+4. **Kullanıcı Deneyimi** (publish/grabcode workflow)
+
+## Gelecek Versiyon Planı
+
+**v0.3.0 (sonraki):**
+- Sandbox (Firejail/container)
+- Paralel worker havuzu
+- Gelişmiş hata sınıflandırma
+- Downsampling otomasyonu (>100k veri noktası)
+
+**v0.4.0+:**
+- Dağıtık yürütme
+- Sonuç önbelleği (kod hash)
+- Web IDE entegrasyonu

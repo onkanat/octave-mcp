@@ -1,4 +1,4 @@
-# MCP Tools Reference
+# OctaveMCP Tools Reference
 
 Bu belge MCP stdio köprüsündeki araçların (tools) parametrelerini, dönüşlerini ve kısa örnekleri içerir.
 
@@ -70,8 +70,8 @@ Bu belge MCP stdio köprüsündeki araçların (tools) parametrelerini, dönüş
 
 - Görsellerin yakalanması için Octave modunu deneyin:
 
-  ```sh
+```sh
   export OCTAVE_RUNNER_MODE=octave
-  ```
-- Büyük görselleri base64 döndürmek istemiyorsanız `images_b64=false` kullanın veya `max_image_bytes` değerini küçültün.
+```
 
+- Büyük görselleri base64 döndürmek istemiyorsanız `images_b64=false` kullanın veya `max_image_bytes` değerini küçültün.

@@ -1,30 +1,147 @@
-# Octave MCP Server API
+# OctaveMCP API v0.2.0
 
-## /run_octave (POST)
+[Türkçe](./README.md) · [English](./en/API.md)
 
-- Octave kodu çalıştırır
+FastAPI tabanlı HTTP REST API endpoint'leri.
 
-## /publish (POST)
+## Base URL
 
-- Koddan HTML ve figür üretir
-- Çıktı: `runs/<session_id>/published/script_publish.html` ve `images/` altında figür PNG’leri; HTML içinde `<img>` olarak gömülüdür
-- Yanıt alanları: `html_b64`, `html_truncated`, `html_original_size`, `publish_dir`, `html_name`, `images` (göreli yollar), `warnings`
+```text
+http://localhost:8000
+```
 
-## /grabcode (POST)
+## Endpoints
 
-- HTML'den kaynak kodu çıkarır
+### POST /run
 
-## /admin/cleanup (POST)
+Octave kodu çalıştırır ve sonuçları döndürür.
 
-- Eski veya hedefli `runs/` oturumlarını temizler
-- Body alanları:
-  - `dry_run` (bool, vars: true)
-  - `force` (bool, vars: false) — Politikaya tabidir; yalnız `MCP_ALLOW_FORCE_DELETE=true` iken etkin
-  - `max_age_hours` (int, opsiyonel)
-  - `max_age_days` (int, opsiyonel)
-  - `session_id` (str, opsiyonel) — Tek bir oturumu hedeflemek için
-- Yanıt alanları: `deleted_runs`, `deleted_sessions`, `dry_run`, `errors` (silinemeyen yollar ve mesajları)
+**Request Body:**
 
-Tüm endpointler için detaylı sözleşmeler ve örnekler için contracts.md dosyasına bakınız.
+```json
+{
+  "code": "disp('Hello World');",
+  "session_id": "optional_session",
+  "timeout": 30,
+  "cpu_time_limit": 10,
+  "memory_limit_mb": 512
+}
+```
 
-Standart hata bloğu şeması için bkz: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
+**Response:**
+
+```json
+{
+  "success": true,
+  "stdout": "Hello World\n",
+  "stderr": "",
+  "exit_code": 0,
+  "runtime_seconds": 0.123,
+  "images": []
+}
+```
+
+### POST /publish
+
+Koddan HTML çıktı ve figürler üretir.
+
+**Request Body:**
+
+```json
+{
+  "code": "x=1:10; y=x.^2; plot(x,y); title('Demo');",
+  "session_id": "demo_session",
+  "show_code": true,
+  "include_images": true
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "html_b64": "base64_encoded_html",
+  "html_truncated": false,
+  "html_original_size": 1234,
+  "publish_dir": "/path/to/runs/demo_session/run_123/published",
+  "html_name": "script_publish.html",
+  "images": ["images/figure_01.png"],
+  "warnings": []
+}
+```
+
+### POST /grabcode
+
+Publish edilmiş HTML'den kaynak kodu çıkarır.
+
+**Request Body:**
+
+```json
+{
+  "session_id": "demo_session",
+  "html_relpath": "run_123/published/script_publish.html"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "code_b64": "base64_encoded_source",
+  "line_count": 15,
+  "warnings": []
+}
+```
+
+### POST /cleanup
+
+Eski session'ları ve run klasörlerini temizler.
+
+**Request Body:**
+
+```json
+{
+  "dry_run": true,
+  "max_age_hours": 48,
+  "session_id": "specific_session"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "deleted_runs": 5,
+  "deleted_sessions": 2,
+  "dry_run": true,
+  "errors": []
+}
+```
+
+## Rate Limiting
+
+- Default: 100 requests / 60 seconds
+- Headers: `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- Environment: `MCP_RATE_LIMIT_MAX`, `MCP_RATE_LIMIT_WINDOW`
+
+## Error Responses
+
+Tüm endpoint'ler standart hata formatı kullanır:
+
+```json
+{
+  "success": false,
+  "error": {
+    "id": "uuid",
+    "type": "timeout|resource_violation|validation_error",
+    "message": "Error description",
+    "hint": "Suggested fix",
+    "timestamp": "2025-10-10T12:00:00Z"
+  }
+}
+```
+
+Detaylı hata şeması için: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
