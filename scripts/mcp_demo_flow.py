@@ -40,7 +40,8 @@ async def main():
 
             run = await session.call_tool(
                 "octave_run",
-                {"code": CODE, "session_id": sid, "images_b64": True, "max_image_bytes": 180000},
+                {"code": CODE, "session_id": sid,
+                    "images_b64": True, "max_image_bytes": 180000},
             )
             print("run:", json.dumps(run.model_dump(), ensure_ascii=False)[:400])
 

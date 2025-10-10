@@ -44,7 +44,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if count > self.max_requests:
             from fastapi.responses import JSONResponse
 
-            resp = JSONResponse(status_code=429, content={"error": "Rate limit exceeded"})
+            resp = JSONResponse(status_code=429, content={
+                                "error": "Rate limit exceeded"})
             resp.headers["Retry-After"] = str(reset_in)
             resp.headers["X-RateLimit-Limit"] = str(self.max_requests)
             resp.headers["X-RateLimit-Remaining"] = "0"

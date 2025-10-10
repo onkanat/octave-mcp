@@ -28,8 +28,8 @@ _grabcode_service = GrabcodeService()
 # prefer explicit None default and fall back to a sane path
 _runs_root = get_env_str("MCP_RUNS_ROOT", None) or os.path.abspath("runs")
 _retention_days = get_env_int("MCP_RUNS_RETENTION_DAYS", 0)
-_cleanup_service = CleanupService(_runs_root,
-                                  days=_retention_days if _retention_days > 0 else None)
+_cleanup_service = CleanupService(
+    _runs_root, days=_retention_days if _retention_days > 0 else None)
 
 # Basit in-memory session -> kod haritası
 session_code_store = {}
@@ -121,7 +121,8 @@ class CleanupRequest(BaseModel):
 
 @app.post("/admin/cleanup")
 def admin_cleanup(req: CleanupRequest):
-    allow_force = os.environ.get("MCP_ALLOW_FORCE_DELETE", "false").lower() in ("1", "true", "yes")
+    allow_force = os.environ.get("MCP_ALLOW_FORCE_DELETE",
+                                 "false").lower() in ("1", "true", "yes")
     if req.force and not allow_force:
         return {
             "deleted_runs": 0,
