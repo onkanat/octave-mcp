@@ -25,7 +25,7 @@ _cleanup_service = CleanupService(_runs_root, days=_retention_days if _retention
 
 @mcp.tool(
     name="octave_run",
-    description="Octave veya Python ile kod çalıştırır; stdout/stderr ve görselleri döndürür.",
+    description=("Octave veya Python ile kod çalıştırır; stdout/stderr ve " "görselleri döndürür."),
 )
 def tool_run(
     code: Annotated[str, "Çalıştırılacak Python/Octave kodu"],
@@ -91,7 +91,10 @@ def tool_grabcode(session_id: Annotated[str, "Oturum kimliği"]) -> Dict[str, An
     return _grabcode_service.grab_code(session_id)
 
 
-@mcp.tool(name="admin_cleanup", description="Saklama ayarına göre eski runs klasörlerini temizler.")
+@mcp.tool(
+    name="admin_cleanup",
+    description=("Saklama ayarına göre eski runs klasörlerini temizler."),
+)
 def tool_cleanup(
     dry_run: Annotated[bool, "Sadece raporla, silme (varsayılan true)"] = True,
     force: Annotated[bool, "Yaş kontrolünü atla, hepsini hedefle (dikkat)"] = False,
@@ -108,8 +111,11 @@ def tool_cleanup(
             "errors": [
                 {
                     "path": None,
-                    "error": "Force delete disabled by policy. Set MCP_ALLOW_FORCE_DELETE=true to enable.",
-                }
+                    "error": (
+                        "Force delete disabled by policy. "
+                        "Set MCP_ALLOW_FORCE_DELETE=true to enable."
+                    ),
+                },
             ],
         }
     return _cleanup_service.cleanup(

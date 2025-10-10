@@ -20,7 +20,8 @@ class VectorizationIssue:
 
 class VectorizationAnalyzer(ast.NodeVisitor):
     """
-    Minimal döngü sezgisel analizörü. Amaç: Vektörizasyon rehberi için uyarı üretmek.
+    Minimal döngü sezgisel analizörü. Amaç: Vektörizasyon rehberi için uyarı
+    üretmek.
     - for/while döngülerini işaretler
     - potansiyel büyüklük sezgisi: range(N) / len(x)
     Not: Bu yalnızca Python modundaki kod için rehber niteliğindedir.
@@ -44,7 +45,8 @@ class VectorizationAnalyzer(ast.NodeVisitor):
             VectorizationIssue(
                 node.lineno,
                 node.col_offset,
-                "While döngüsü tespit edildi; vektörizasyon veya erken çıkış koşullarını değerlendirin.",
+                "While döngüsü tespit edildi; vektörizasyon veya erken çıkış koşulunu"
+                " değerlendirin.",
             )
         )
         self.generic_visit(node)

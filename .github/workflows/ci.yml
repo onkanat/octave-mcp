@@ -52,7 +52,7 @@ jobs:
           black --check src tests scripts
           isort --check-only src tests scripts
           # Exclude .venv to avoid linting third-party packages installed in the virtualenv
-          flake8 src tests scripts --exclude=.venv
+          flake8 src tests scripts --exclude=.venv --max-line-length=99
 
       - name: Run tests
         run: |

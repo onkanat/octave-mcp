@@ -17,11 +17,16 @@ app = FastAPI()
 # Rate limit ayarlarını .env'den oku (varsayılan: 100 istek / 60 sn)
 _max_requests = get_env_int("MCP_RATE_LIMIT_MAX", 100)
 _window_seconds = get_env_int("MCP_RATE_LIMIT_WINDOW", 60)
-app.add_middleware(RateLimitMiddleware, max_requests=_max_requests, window_seconds=_window_seconds)
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests=_max_requests,
+    window_seconds=_window_seconds,
+)
 _octave_runner = OctaveRunner()
 _publish_service = PublishService()
 _grabcode_service = GrabcodeService()
-_runs_root = get_env_str("MCP_RUNS_ROOT", os.path.abspath("runs")) or os.path.abspath("runs")
+# prefer explicit None default and fall back to a sane path
+_runs_root = get_env_str("MCP_RUNS_ROOT", None) or os.path.abspath("runs")
 _retention_days = get_env_int("MCP_RUNS_RETENTION_DAYS", 0)
 _cleanup_service = CleanupService(_runs_root, days=_retention_days if _retention_days > 0 else None)
 
@@ -84,7 +89,9 @@ def run_octave(req: RunRequest):
                 stdout_truncated=("...[truncated]" in stdout),
                 stderr_truncated=("...[truncated]" in stderr),
                 resource_violation=None,
-                details={"exit_code": result.get("exit_code")},
+                details={
+                    "exit_code": result.get("exit_code"),
+                },
             )
     except Exception:
         pass
@@ -122,7 +129,10 @@ def admin_cleanup(req: CleanupRequest):
             "errors": [
                 {
                     "path": None,
-                    "error": "Force delete disabled by policy. Set MCP_ALLOW_FORCE_DELETE=true to enable.",
+                    "error": (
+                        "Force delete disabled by policy. "
+                        "Set MCP_ALLOW_FORCE_DELETE=true to enable."
+                    ),
                 }
             ],
         }
