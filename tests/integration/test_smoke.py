@@ -1,9 +1,15 @@
-import sys
+from api.endpoints import app
 import os
+import sys
+
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
-from api.endpoints import app
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "../../src")))
 
 
 def test_smoke():
@@ -12,7 +18,11 @@ def test_smoke():
     code = "print('smoke')"
     session_id = "smoke1"
     # Publish
-    resp_pub = client.post("/publish", json={"session_id": session_id, "code": code})
+    resp_pub = client.post(
+        "/publish",
+        json={
+            "session_id": session_id,
+            "code": code})
     assert resp_pub.status_code == 200
     # Grabcode
     resp_grab = client.post("/grabcode", json={"session_id": session_id})
@@ -20,7 +30,11 @@ def test_smoke():
     data_grab = resp_grab.json()
     assert data_grab["code"] == code
     # Run
-    resp_run = client.post("/run_octave", json={"session_id": session_id, "code": code})
+    resp_run = client.post(
+        "/run_octave",
+        json={
+            "session_id": session_id,
+            "code": code})
     assert resp_run.status_code == 200
     data_run = resp_run.json()
     assert data_run["success"]

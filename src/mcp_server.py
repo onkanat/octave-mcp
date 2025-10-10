@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from mcp.server.fastmcp import FastMCP
-from typing import Optional, Dict, Any, Annotated, List
 import os
 from base64 import b64encode
+from typing import Annotated, Any, Dict, List, Optional
 
+from mcp.server.fastmcp import FastMCP
+
+from services.cleanup_service import CleanupService
+from services.grabcode_service import GrabcodeService
 from services.octave_runner import OctaveRunner
 from services.publish_service import PublishService
-from services.grabcode_service import GrabcodeService
-from services.cleanup_service import CleanupService
 from utils.config import get_env_int, get_env_str
 from utils.resource_limits import ResourceLimiter
-
 
 mcp = FastMCP("octave_mcp")
 

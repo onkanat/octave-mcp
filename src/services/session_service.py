@@ -1,6 +1,7 @@
-from src.models.session import Session
-from typing import Dict
 from datetime import datetime
+from typing import Dict
+
+from src.models.session import Session
 
 
 class SessionService:

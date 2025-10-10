@@ -1,9 +1,15 @@
-from fastapi.testclient import TestClient
-import sys
-import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 from api.endpoints import app
+import os
+import sys
+
+from fastapi.testclient import TestClient
+
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "../../src")))
 
 
 def test_publish_contract():
@@ -12,7 +18,8 @@ def test_publish_contract():
     response = client.post("/publish", json=payload)
     assert response.status_code == 200
     data = response.json()
-    # Contract: html_b64, html_truncated, html_original_size, publish_dir, html_name, images[], warnings[]
+    # Contract: html_b64, html_truncated, html_original_size, publish_dir,
+    # html_name, images[], warnings[]
     assert "html_b64" in data
     assert "html_truncated" in data
     assert "html_original_size" in data
