@@ -1,0 +1,8 @@
+fastapi>=0.100
+uvicorn[standard]
+pytest
+gunicorn
+requests
+python-dotenv
+httpx
+mcp>=1.8.0

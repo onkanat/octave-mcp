@@ -1,85 +1,76 @@
-# Constitution Update Checklist
 
-When amending the constitution (`/memory/constitution.md`), ensure all dependent documents are updated to maintain consistency.
+# Constitution Update Checklist (Octave MCP)
 
-## Templates to Update
+Anayasa (`/memory/constitution.md`) güncellendiğinde, tüm bağlı dokümanların ve şablonların tutarlılığı sağlanmalıdır.
 
-### When adding/modifying ANY article:
-- [ ] `/templates/plan-template.md` - Update Constitution Check section
-- [ ] `/templates/spec-template.md` - Update if requirements/scope affected
-- [ ] `/templates/tasks-template.md` - Update if new task types needed
-- [ ] `/.claude/commands/plan.md` - Update if planning process changes
-- [ ] `/.claude/commands/tasks.md` - Update if task generation affected
-- [ ] `/CLAUDE.md` - Update runtime development guidelines
+## Güncellenecek Şablonlar
 
-### Article-specific updates:
+### Herhangi bir madde eklenirse/değişirse:
+- [ ] `/templates/plan-template.md` – Anayasa kontrol bölümü güncellenmeli
+- [ ] `/templates/spec-template.md` – Gereksinim/kapsam değiştiyse güncellenmeli
+- [ ] `/templates/tasks-template.md` – Yeni görev türleri gerekiyorsa güncellenmeli
+- [ ] `/.claude/commands/plan.md` – Planlama süreci değiştiyse güncellenmeli
+- [ ] `/.claude/commands/tasks.md` – Görev üretimi etkileniyorsa güncellenmeli
+- [ ] `/CLAUDE.md` – Çalışma zamanı geliştirme rehberi güncellenmeli
 
-#### Article I (Library-First):
-- [ ] Ensure templates emphasize library creation
-- [ ] Update CLI command examples
-- [ ] Add llms.txt documentation requirements
+### Maddeye özel güncellemeler:
 
-#### Article II (CLI Interface):
-- [ ] Update CLI flag requirements in templates
-- [ ] Add text I/O protocol reminders
+#### I. Modülerlik ve Bağımsızlık
+- [ ] Şablonlarda modül/araç ayrımı vurgulanmalı
+- [ ] Ortak yardımcılar ve kod tekrarları için örnekler eklenmeli
 
-#### Article III (Test-First):
-- [ ] Update test order in all templates
-- [ ] Emphasize TDD requirements
-- [ ] Add test approval gates
+#### II. CLI ve API Arayüzü
+- [ ] CLI ve HTTP API örnekleri güncellenmeli
+- [ ] Giriş/çıkış protokolü (stdin/stdout, JSON, hata yönetimi) şablonlara eklenmeli
 
-#### Article IV (Integration Testing):
-- [ ] List integration test triggers
-- [ ] Update test type priorities
-- [ ] Add real dependency requirements
+#### III. Test-First (TDD)
+- [ ] Test sırası ve zorunluluğu tüm şablonlarda vurgulanmalı
+- [ ] smoke_test.py ve entegrasyon testleri örneklenmeli
 
-#### Article V (Observability):
-- [ ] Add logging requirements to templates
-- [ ] Include multi-tier log streaming
-- [ ] Update performance monitoring sections
+#### IV. Entegrasyon ve Uçtan Uca Test
+- [ ] Entegrasyon testi tetikleyicileri listelenmeli
+- [ ] Test tipleri ve öncelikleri güncellenmeli
 
-#### Article VI (Versioning):
-- [ ] Add version increment reminders
-- [ ] Include breaking change procedures
-- [ ] Update migration requirements
+#### V. Gözlemlenebilirlik, Sürümleme, Sadelik
+- [ ] Loglama ve hata izleme gereksinimleri şablonlara eklenmeli
+- [ ] Sürüm formatı ve değişiklik özeti zorunluluğu belirtilmeli
+- [ ] YAGNI ve sadelik ilkeleri örneklenmeli
 
-#### Article VII (Simplicity):
-- [ ] Update project count limits
-- [ ] Add pattern prohibition examples
-- [ ] Include YAGNI reminders
+#### Güvenlik ve Performans
+- [ ] Resource limit, sandbox, rate limit ve otomatik temizlik kuralları şablonlara eklenmeli
+- [ ] Vektörizasyon, grafik optimizasyonu ve paket yönetimi örnekleri güncellenmeli
 
-## Validation Steps
+## Doğrulama Adımları
 
-1. **Before committing constitution changes:**
-   - [ ] All templates reference new requirements
-   - [ ] Examples updated to match new rules
-   - [ ] No contradictions between documents
+1. **Anayasa değişikliği öncesi:**
+   - [ ] Tüm şablonlar yeni gereksinimleri referans alıyor mu?
+   - [ ] Örnekler yeni kurallara uygun mu?
+   - [ ] Dokümanlar arasında çelişki yok mu?
 
-2. **After updating templates:**
-   - [ ] Run through a sample implementation plan
-   - [ ] Verify all constitution requirements addressed
-   - [ ] Check that templates are self-contained (readable without constitution)
+2. **Şablonlar güncellendikten sonra:**
+   - [ ] Örnek bir uygulama planı ile test et
+   - [ ] Tüm anayasa gereksinimleri karşılanıyor mu?
+   - [ ] Şablonlar bağımsız okunabilir mi (anayasa olmadan)?
 
-3. **Version tracking:**
-   - [ ] Update constitution version number
-   - [ ] Note version in template footers
-   - [ ] Add amendment to constitution history
+3. **Sürüm takibi:**
+   - [ ] Anayasa sürüm numarası güncellendi mi?
+   - [ ] Şablon dipnotlarında sürüm belirtildi mi?
+   - [ ] Anayasa değişiklik geçmişine eklendi mi?
 
-## Common Misses
+## Sık Atlananlar
 
-Watch for these often-forgotten updates:
-- Command documentation (`/commands/*.md`)
-- Checklist items in templates
-- Example code/commands
-- Domain-specific variations (web vs mobile vs CLI)
-- Cross-references between documents
+- Komut dokümantasyonu (`/commands/*.md`)
+- Şablonlardaki kontrol listeleri
+- Örnek kod/komutlar
+- Alan/ortam varyasyonları (web, CLI, API)
+- Dokümanlar arası çapraz referanslar
 
-## Template Sync Status
+## Şablon Senkronizasyon Durumu
 
-Last sync check: 2025-07-16
-- Constitution version: 2.1.1
-- Templates aligned: ❌ (missing versioning, observability details)
+Son kontrol: 2025-09-17
+- Anayasa sürümü: 1.0.0
+- Şablonlar uyumlu: ✅
 
 ---
 
-*This checklist ensures the constitution's principles are consistently applied across all project documentation.*
+*Bu kontrol listesi, anayasa ilkelerinin tüm proje dokümantasyonunda tutarlı şekilde uygulanmasını sağlar.*
