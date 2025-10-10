@@ -49,10 +49,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://hakankilicaslan.github.io/octave-mcp"
-Documentation = "https://hakankilicaslan.github.io/octave-mcp"
-Repository = "https://github.com/hakankilicaslan/octave-mcp"
-Issues = "https://github.com/hakankilicaslan/octave-mcp/issues"
+Homepage = "https://onkanat.github.io/octave-mcp"
+Documentation = "https://onkanat.github.io/octave-mcp"
+Repository = "https://github.com/onkanat/octave-mcp"
+Issues = "https://github.com/onkanat/octave-mcp/issues"
 
 [project.optional-dependencies]
 dev = [

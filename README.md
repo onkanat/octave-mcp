@@ -16,13 +16,13 @@ octave-mcp
 ### Option 2: One-line installer
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/hakankilicaslan/octave-mcp/master/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/onkanat/octave-mcp/master/install.sh | bash
 ```
 
 ### Option 3: Development setup
 
 ```sh
-git clone https://github.com/hakankilicaslan/octave-mcp.git
+git clone https://github.com/onkanat/octave-mcp.git
 cd octave-mcp
 python3 -m venv .venv
 source .venv/bin/activate
@@ -46,14 +46,14 @@ python src/mcp_server.py
 
 GitHub Pages (yayınlandıktan sonra):
 
-- Ana sayfa (TR): docs/index.md → <https://hakankilicaslan.github.io/octave-mcp/>
-- Ana sayfa (EN): docs/en/index.md → <https://hakankilicaslan.github.io/octave-mcp/en/>
+- Ana sayfa (TR): docs/index.md → <https://onkanat.github.io/octave-mcp/>
+- Ana sayfa (EN): docs/en/index.md → <https://onkanat.github.io/octave-mcp/en/>
 
 Hızlı linkler:
 
-- API (TR): <https://hakankilicaslan.github.io/octave-mcp/API.html>
-- API (EN): <https://hakankilicaslan.github.io/octave-mcp/en/API.html>
-- MCP Tools (TR): <https://hakankilicaslan.github.io/octave-mcp/MCP_TOOLS.html>
-- MCP Tools (EN): <https://hakankilicaslan.github.io/octave-mcp/en/MCP_TOOLS.html>
-- Error Schema (TR): <https://hakankilicaslan.github.io/octave-mcp/ERROR_SCHEMA.html>
-- Error Schema (EN): <https://hakankilicaslan.github.io/octave-mcp/en/ERROR_SCHEMA.html>
+- API (TR): <https://onkanat.github.io/octave-mcp/API.html>
+- API (EN): <https://onkanat.github.io/octave-mcp/en/API.html>
+- MCP Tools (TR): <https://onkanat.github.io/octave-mcp/MCP_TOOLS.html>
+- MCP Tools (EN): <https://onkanat.github.io/octave-mcp/en/MCP_TOOLS.html>
+- Error Schema (TR): <https://onkanat.github.io/octave-mcp/ERROR_SCHEMA.html>
+- Error Schema (EN): <https://onkanat.github.io/octave-mcp/en/ERROR_SCHEMA.html>
