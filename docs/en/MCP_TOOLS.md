@@ -24,7 +24,8 @@ parameters, return shapes, and short examples.
   - `images_b64` (bool, optional, default: false): Return images as base64
   - `max_image_bytes` (int, optional, default: 200000): Max bytes per image
 - Return:
-  - `success` (bool), `stdout` (str), `stderr` (str), `exit_code` (int), `runtime_seconds` (float)
+  - `success` (bool), `stdout` (str), `stderr` (str),
+    `exit_code` (int), `runtime_seconds` (float)
   - `images`: Array. Each item:
     `{ name, path?, b64?, size? }`
 - Example (pseudocode):
@@ -45,7 +46,8 @@ parameters, return shapes, and short examples.
   - `code` (str, required)
   - `session_id` (str, optional)
 - Return:
-  - `html_b64`, `html_truncated`, `html_original_size`, `publish_dir`, `html_name`, `images`, `warnings`
+  - `html_b64`, `html_truncated`, `html_original_size`,
+    `publish_dir`, `html_name`, `images`, `warnings`
 - Notes:
   - Figures from the last run (e.g., `fig*.png`) are copied into `images/` and
     embedded into HTML via `<img>`.
