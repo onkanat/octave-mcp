@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 import base64
@@ -30,17 +29,21 @@ _cleanup_service = CleanupService(_runs_root, days=_retention_days if _retention
 # Basit in-memory session -> kod haritası
 session_code_store = {}
 
+
 # --- Request/Response Models (Stub) ---
 class RunRequest(BaseModel):
     code: str
     session_id: str | None = None
 
+
 class PublishRequest(BaseModel):
     code: str
     session_id: str | None = None
 
+
 class GrabcodeRequest(BaseModel):
     session_id: str
+
 
 # --- Endpoints (Stub) ---
 @app.post("/run_octave")
@@ -89,10 +92,12 @@ def run_octave(req: RunRequest):
 
     return result
 
+
 @app.post("/publish")
 def publish(req: PublishRequest):
     # Koddan dummy HTML üret, base64 ile encode et
     return _publish_service.publish(req.code, req.session_id)
+
 
 @app.post("/grabcode")
 def grabcode(req: GrabcodeRequest):

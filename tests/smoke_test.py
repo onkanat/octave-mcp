@@ -3,7 +3,7 @@ import os
 from fastapi.testclient import TestClient
 
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 from api.endpoints import app  # noqa: E402
 
 

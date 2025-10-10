@@ -3,17 +3,20 @@ from fastapi.testclient import TestClient
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 from api.endpoints import app
+
 
 def publish_code(client, session_id, code):
     payload = {"session_id": session_id, "code": code}
     return client.post("/publish", json=payload)
 
+
 def grab_code(client, session_id, result_dict):
     payload = {"session_id": session_id}
     resp = client.post("/grabcode", json=payload)
     result_dict[session_id] = resp.json().get("code")
+
 
 def test_publish_grabcode_concurrency():
     client = TestClient(app)

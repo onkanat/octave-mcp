@@ -4,6 +4,7 @@ import sys
 import json
 import requests
 
+
 def main():
     parser = argparse.ArgumentParser(description="Octave MCP CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -27,7 +28,10 @@ def main():
             r = requests.post(f"{base_url}/run_octave", json=payload)
             print(json.dumps(r.json(), indent=2, ensure_ascii=False))
         except requests.exceptions.RequestException as e:
-            print(f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}", file=sys.stderr)
+            print(
+                f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}",
+                file=sys.stderr,
+            )
             sys.exit(1)
     elif args.command == "publish":
         payload = {"code": args.code, "session_id": args.session_id}
@@ -35,7 +39,10 @@ def main():
             r = requests.post(f"{base_url}/publish", json=payload)
             print(json.dumps(r.json(), indent=2, ensure_ascii=False))
         except requests.exceptions.RequestException as e:
-            print(f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}", file=sys.stderr)
+            print(
+                f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}",
+                file=sys.stderr,
+            )
             sys.exit(1)
     elif args.command == "grabcode":
         payload = {"session_id": args.session_id}
@@ -43,10 +50,14 @@ def main():
             r = requests.post(f"{base_url}/grabcode", json=payload)
             print(json.dumps(r.json(), indent=2, ensure_ascii=False))
         except requests.exceptions.RequestException as e:
-            print(f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}", file=sys.stderr)
+            print(
+                f"Sunucuya bağlanılamadı: {base_url}. Uygulamayı başlattınız mı? Hata: {e}",
+                file=sys.stderr,
+            )
             sys.exit(1)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

@@ -119,7 +119,11 @@ class OctaveRunner:
         # Görselleri topla (octave modunda çalışmışsa)
         images = []
         try:
-            images_dir = tmp_dir if self.mode == "octave" else (os.path.dirname(script_path) if script_path else None)
+            images_dir = (
+                tmp_dir
+                if self.mode == "octave"
+                else (os.path.dirname(script_path) if script_path else None)
+            )
             if images_dir and os.path.isdir(images_dir):
                 for name in sorted(os.listdir(images_dir)):
                     if name.startswith("fig") and name.endswith(".png"):

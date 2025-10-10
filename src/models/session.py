@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+
 class Session:
     def __init__(self, session_id: str, persistent: bool, work_dir: str):
         self.session_id = session_id

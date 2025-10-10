@@ -2,6 +2,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import time
 
+
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, max_requests=10, window_seconds=60):
         super().__init__(app)
@@ -18,7 +19,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             client_ip = xff.split(",")[0].strip()
         else:
             xri = request.headers.get("x-real-ip")
-            client_ip = xri.strip() if xri else (request.client.host if request.client else "unknown")
+            client_ip = (
+                xri.strip() if xri else (request.client.host if request.client else "unknown")
+            )
         now = time.time()
         window = int(now // self.window_seconds)
         # Eski pencere anahtarlarını periyodik temizle (basit, global)
@@ -39,6 +42,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         reset_in = max(reset_ts - int(now), 0)
         if count > self.max_requests:
             from fastapi.responses import JSONResponse
+
             resp = JSONResponse(status_code=429, content={"error": "Rate limit exceeded"})
             resp.headers["Retry-After"] = str(reset_in)
             resp.headers["X-RateLimit-Limit"] = str(self.max_requests)
@@ -55,5 +59,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         except Exception:
             pass
         return response
+
 
 # TODO: Session persistence ve temizlik entegrasyonu ayrı servislerde uygulanacak.

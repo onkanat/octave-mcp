@@ -2,6 +2,7 @@ import os
 import time
 import shutil
 
+
 class CleanupService:
     def __init__(self, runs_root: str, hours: int | None = 48, days: int | None = None):
         self.runs_root = runs_root
@@ -52,4 +53,9 @@ class CleanupService:
                     deleted_runs += 1
             except Exception:
                 continue
-        return {"deleted_runs": deleted_runs, "deleted_sessions": deleted_sessions, "dry_run": dry_run, "errors": errors}
+        return {
+            "deleted_runs": deleted_runs,
+            "deleted_sessions": deleted_sessions,
+            "dry_run": dry_run,
+            "errors": errors,
+        }

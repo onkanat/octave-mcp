@@ -1,5 +1,7 @@
 class ResourceLimiter:
-    def __init__(self, cpu_time_limit, memory_limit_mb, max_output_chars, max_image_size_bytes, timeout):
+    def __init__(
+        self, cpu_time_limit, memory_limit_mb, max_output_chars, max_image_size_bytes, timeout
+    ):
         self.cpu_time_limit = cpu_time_limit
         self.memory_limit_mb = memory_limit_mb
         self.max_output_chars = max_output_chars
@@ -14,7 +16,9 @@ class ResourceLimiter:
 
         limits_to_apply = []
         if self.cpu_time_limit:
-            limits_to_apply.append((getattr(resource, "RLIMIT_CPU", None), int(self.cpu_time_limit)))
+            limits_to_apply.append(
+                (getattr(resource, "RLIMIT_CPU", None), int(self.cpu_time_limit))
+            )
         if self.memory_limit_mb:
             mem_bytes = int(self.memory_limit_mb) * 1024 * 1024
             # RLIMIT_AS genelde sanal bellek; RLIMIT_DATA bazı sistemlerde çalışır
@@ -27,6 +31,7 @@ class ResourceLimiter:
 
         def _apply():
             import resource as res
+
             for key, val in limits_to_apply:
                 try:
                     res.setrlimit(key, (val, val))

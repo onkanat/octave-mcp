@@ -39,9 +39,4 @@ def build_error_block(
 class ErrorFormatter:
     @staticmethod
     def format_error(identifier: str, message: str, stack: str, hint: str) -> dict:
-        return {
-            "identifier": identifier,
-            "message": message,
-            "stack": stack,
-            "hint": hint
-        }
+        return {"identifier": identifier, "message": message, "stack": stack, "hint": hint}

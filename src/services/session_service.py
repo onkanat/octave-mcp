@@ -2,6 +2,7 @@ from src.models.session import Session
 from typing import Dict
 from datetime import datetime
 
+
 class SessionService:
     def __init__(self):
         self.sessions: Dict[str, Session] = {}

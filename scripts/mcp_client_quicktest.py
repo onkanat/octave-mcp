@@ -8,6 +8,7 @@ from mcp.client.stdio import StdioServerParameters, stdio_client
 # Quick local test for the MCP stdio server.
 # Usage: python scripts/mcp_client_quicktest.py
 
+
 async def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     server_py = os.path.join(repo_root, "src", "mcp_server.py")
@@ -36,12 +37,15 @@ async def main():
             print("grabcode:", json.dumps(grab.model_dump(), ensure_ascii=False)[:200])
 
             # 3) run
-            run = await session.call_tool("octave_run", {"code": "print('run ok')", "session_id": "m1"})
+            run = await session.call_tool(
+                "octave_run", {"code": "print('run ok')", "session_id": "m1"}
+            )
             print("run:", json.dumps(run.model_dump(), ensure_ascii=False)[:200])
 
             # 4) cleanup (dry-run)
             cl = await session.call_tool("admin_cleanup", {"dry_run": True})
             print("cleanup:", json.dumps(cl.model_dump(), ensure_ascii=False))
+
 
 if __name__ == "__main__":
     asyncio.run(main())

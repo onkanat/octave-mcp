@@ -46,7 +46,9 @@ class PublishService:
             pass
 
         # Basit HTML şablonu: kod + varsa görsel galeri
-        gallery_html = "\n".join([f"<div><img src='{rp}' alt='{rp}' /></div>" for rp in images_relpaths])
+        gallery_html = "\n".join(
+            [f"<div><img src='{rp}' alt='{rp}' /></div>" for rp in images_relpaths]
+        )
         html = (
             "<html><body>"
             "<h2>Published Code</h2>"

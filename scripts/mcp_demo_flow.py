@@ -11,6 +11,7 @@ Y = sin(X.^2);
 figure; plot(X, Y, 'b-', 'LineWidth', 1.5); grid on; title('Y = sin(X^2)');
 """.strip()
 
+
 async def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     server_py = os.path.join(repo_root, "src", "mcp_server.py")
@@ -41,6 +42,7 @@ async def main():
                 {"code": CODE, "session_id": sid, "images_b64": True, "max_image_bytes": 180000},
             )
             print("run:", json.dumps(run.model_dump(), ensure_ascii=False)[:400])
+
 
 if __name__ == "__main__":
     asyncio.run(main())
