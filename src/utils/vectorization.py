@@ -45,7 +45,8 @@ class VectorizationAnalyzer(ast.NodeVisitor):
                 node.lineno,
                 node.col_offset,
                 "While döngüsü tespit edildi; vektörizasyon veya erken çıkış koşullarını değerlendirin.",
-            ))
+            )
+        )
         self.generic_visit(node)
 
 

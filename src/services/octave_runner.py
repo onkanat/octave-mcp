@@ -13,9 +13,7 @@ class OctaveRunner:
         self.mode = os.getenv("OCTAVE_RUNNER_MODE", "python").lower()
         self.octave_bin = shutil.which("octave") or shutil.which("octave-cli")
         # Vision modeli mi? Değilse görüntüleri dosya sisteminde tut, sadece isim dön
-        self.is_vision = os.getenv(
-            "MCP_IS_VISION_MODEL", "false").lower() in (
-            "1", "true", "yes")
+        self.is_vision = os.getenv("MCP_IS_VISION_MODEL", "false").lower() in ("1", "true", "yes")
         # Figür boyutları (varsayılan 620x480)
         try:
             self.fig_width = int(os.getenv("OCTAVE_FIG_WIDTH", "620"))
@@ -23,11 +21,7 @@ class OctaveRunner:
         except Exception:
             self.fig_width, self.fig_height = 620, 480
 
-    def run_code(
-            self,
-            code: str,
-            resource_limits,
-            include_image_paths: bool | None = None) -> Dict:
+    def run_code(self, code: str, resource_limits, include_image_paths: bool | None = None) -> Dict:
         start = time.time()
         stdout = ""
         stderr = ""
@@ -136,8 +130,7 @@ class OctaveRunner:
                     if name.startswith("fig") and name.endswith(".png"):
                         show_path = self.is_vision or bool(include_image_paths)
                         if show_path:
-                            images.append(
-                                {"name": name, "path": os.path.join(images_dir, name)})
+                            images.append({"name": name, "path": os.path.join(images_dir, name)})
                         else:
                             # Vision değilse sadece isim döndür (UI’yi şişirmemek için)
                             images.append({"name": name})

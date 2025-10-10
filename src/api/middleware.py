@@ -21,8 +21,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         else:
             xri = request.headers.get("x-real-ip")
             client_ip = (
-                xri.strip() if xri else (
-                    request.client.host if request.client else "unknown"))
+                xri.strip() if xri else (request.client.host if request.client else "unknown")
+            )
         now = time.time()
         window = int(now // self.window_seconds)
         # Eski pencere anahtarlarını periyodik temizle (basit, global)
@@ -44,9 +44,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if count > self.max_requests:
             from fastapi.responses import JSONResponse
 
-            resp = JSONResponse(
-                status_code=429, content={
-                    "error": "Rate limit exceeded"})
+            resp = JSONResponse(status_code=429, content={"error": "Rate limit exceeded"})
             resp.headers["Retry-After"] = str(reset_in)
             resp.headers["X-RateLimit-Limit"] = str(self.max_requests)
             resp.headers["X-RateLimit-Remaining"] = "0"

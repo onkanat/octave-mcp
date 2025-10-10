@@ -5,12 +5,7 @@ from fastapi.testclient import TestClient
 
 from api.endpoints import app
 
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "../../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
 
 def test_publish_contract():

@@ -1,11 +1,7 @@
 class ResourceLimiter:
     def __init__(
-            self,
-            cpu_time_limit,
-            memory_limit_mb,
-            max_output_chars,
-            max_image_size_bytes,
-            timeout):
+        self, cpu_time_limit, memory_limit_mb, max_output_chars, max_image_size_bytes, timeout
+    ):
         self.cpu_time_limit = cpu_time_limit
         self.memory_limit_mb = memory_limit_mb
         self.max_output_chars = max_output_chars

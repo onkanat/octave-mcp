@@ -35,11 +35,7 @@ class CleanupService:
         deleted_sessions = 0
         errors: list[dict] = []
         if not os.path.isdir(self.runs_root):
-            return {
-                "deleted_runs": 0,
-                "deleted_sessions": 0,
-                "dry_run": dry_run,
-                "errors": []}
+            return {"deleted_runs": 0, "deleted_sessions": 0, "dry_run": dry_run, "errors": []}
         for name in os.listdir(self.runs_root):
             dir_path = os.path.join(self.runs_root, name)
             try:
