@@ -2,7 +2,9 @@
 
 English · [Türkçe](../ERROR_SCHEMA.md)
 
-This document defines the standard error block returned by the HTTP API and MCP tools. The schema aims to improve diagnosis, observability, and clarity around resource limit violations.
+This document defines the standard error block returned by the HTTP API and MCP tools.
+The schema aims to improve diagnosis, observability, and clarity around resource
+limit violations.
 
 ## Purpose
 

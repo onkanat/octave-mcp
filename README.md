@@ -16,7 +16,8 @@ octave-mcp
 ### Option 2: One-line installer
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/onkanat/octave-mcp/master/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/onkanat/octave-mcp/master/
+install.sh | bash
 ```
 
 ### Option 3: Development setup
