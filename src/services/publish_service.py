@@ -13,7 +13,8 @@ class PublishService:
         if session_id:
             session_code_store[session_id] = code
 
-        runs_root = get_env_str("MCP_RUNS_ROOT", os.path.abspath("runs")) or os.path.abspath("runs")
+        runs_root = get_env_str("MCP_RUNS_ROOT",
+                                os.path.abspath("runs")) or os.path.abspath("runs")
         session_folder = session_id or "anonymous"
         publish_dir = os.path.join(runs_root, session_folder, "published")
         os.makedirs(publish_dir, exist_ok=True)
@@ -50,10 +51,7 @@ class PublishService:
 
         # Basit HTML şablonu: kod + varsa görsel galeri
         gallery_html = "\n".join(
-            [
-                f"<div><img src='{rp}' alt='{rp}' /></div>"
-                for rp in images_relpaths
-            ]
+            [f"<div><img src='{rp}' alt='{rp}' /></div>" for rp in images_relpaths]
         )
         html = (
             "<html><body>"

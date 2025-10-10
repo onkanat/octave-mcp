@@ -20,13 +20,14 @@ _publish_service = PublishService()
 _grabcode_service = GrabcodeService()
 _runs_root = get_env_str("MCP_RUNS_ROOT", None) or get_env_str("RUNS_ROOT", None) or "runs"
 _retention_days = get_env_int("MCP_RUNS_RETENTION_DAYS", 0)
-_cleanup_service = CleanupService(_runs_root, days=_retention_days if _retention_days > 0 else None)
+_cleanup_service = CleanupService(_runs_root,
+                                  days=_retention_days if _retention_days > 0 else None)
 
 
-@mcp.tool(
-    name="octave_run",
-    description=("Octave veya Python ile kod çalıştırır; stdout/stderr ve " "görselleri döndürür."),
-)
+@mcp.tool(name="octave_run",
+          description=("Octave veya Python ile kod çalıştırır; stdout/stderr ve "
+                       "görselleri döndürür."),
+          )
 def tool_run(
     code: Annotated[str, "Çalıştırılacak Python/Octave kodu"],
     session_id: Annotated[Optional[str], "Oturum kimliği (opsiyonel)"] = None,
