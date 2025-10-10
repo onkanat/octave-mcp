@@ -21,7 +21,12 @@ class OctaveRunner:
         except Exception:
             self.fig_width, self.fig_height = 620, 480
 
-    def run_code(self, code: str, resource_limits, include_image_paths: bool | None = None) -> Dict:
+    def run_code(
+        self,
+        code: str,
+        resource_limits,
+        include_image_paths: bool | None = None,
+    ) -> Dict:
         start = time.time()
         stdout = ""
         stderr = ""
