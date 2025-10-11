@@ -7,9 +7,9 @@ import threading
 from base64 import b64encode
 from typing import Annotated, Any, Dict, List, Optional
 
-_LOG = logging.getLogger(__name__)
-
 from mcp.server.fastmcp import FastMCP
+
+_LOG = logging.getLogger(__name__)
 
 try:
     # When imported as a package (recommended): `import src.mcp_server`
@@ -200,12 +200,6 @@ def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thre
 
     Returns the Thread if started, otherwise None (uvicorn not available).
     """
-    try:
-        import uvicorn
-    except Exception:
-        _LOG.warning("uvicorn not installed; HTTP API will not be started")
-        return None
-
     # Ensure repo root is on sys.path so imports like `src.api.endpoints` work
     try:
         import sys
