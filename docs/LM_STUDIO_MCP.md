@@ -37,6 +37,7 @@ Notlar:
   `Bearer <TOKEN>` ekleyin.
 
 ## 2) Deeplink (tek-tıkla ekleme)
+
 LM Studio `lmstudio://add_mcp` deeplink protokolünü destekler. Deeplink şu formattadır:
 
 ```
@@ -84,8 +85,9 @@ curl -X POST "http://127.0.0.1:8000/run_octave" \
 ```
 
 Başka örnek endpoint'ler:
- - `/publish`  — kodu HTML'e dönüştürüp kaydeder
- - `/grabcode` — bir session için son yayınlanan kodu getirir
+
+- `/publish`  — kodu HTML'e dönüştürüp kaydeder
+- `/grabcode` — bir session için son yayınlanan kodu getirir
 
 ## 4) LM Studio Tool konfigurasyonu (özet)
 
@@ -94,11 +96,37 @@ Başka örnek endpoint'ler:
 - URL: `http://127.0.0.1:8000/run_octave`
 - Body (JSON): `{"code":"{{user_input}}","session_id":"{{session_id}}"}`
 
-## 5) Otomatik deeplink oluşturucu (opsiyonel)
+## 5) Komut-tabanlı MCP örneği ve deeplink yardımcıları
 
-İsterseniz repo'ya küçük bir script (`scripts/generate_lm_deeplink.py`) ekleyebilirim; bu
-script kendi sunucu URL'nizi ve (opsiyonel) header bilgilerinizi alıp size hazır deeplink
-üretecek.
+Bu repoya, LM Studio'nun komut-tabanlı MCP başlatma modu için hazır bir örnek JSON dosyası
+ekledim: `mcp_command.json` (repo kökünde). Dosya, bu projenin tipik çalışma dizinlerine göre
+ayarlandı — lütfen kendi çalışma dizininize göre `command` ve `args` içindeki absolute yolları
+güncelleyin.
+
+Özellikle kontrol etmeniz gerekenler:
+
+- `command` — virtualenv içindeki Python yürütülebilirinin tam yolu (ör. `/path/to/.venv/bin/python`).
+- `args` — `src/mcp_server.py` dosyasının absolute yolu.
+- `env` — `MCP_RUNS_ROOT`, `TMPDIR`, zaman aşımı ve resource limitleri gibi ortam değişkenleri.
+
+LM Studio'ya bu komut-tabanlı MCP'yi eklemek için ya `mcp_command.json` içeriğini doğrudan
+`Install > Edit mcp.json` editörüne yapıştırın ya da aynı içeriği base64 ile encode edip
+deeplink olarak kullanın (bkz. aşağıdaki Deeplink örneği).
+
+Deeplink (komut-tabanlı config'i encode etmek için örnek):
+
+```bash
+python3 - <<'PY'
+import base64, json
+with open('mcp_command.json','rb') as f:
+  encoded = base64.urlsafe_b64encode(f.read()).decode()
+print(f"lmstudio://add_mcp?name=octave-mcp-command&config={encoded}")
+PY
+```
+
+Not: LM Studio, başlattığı komutu kendi process olarak çalıştırır. Bu nedenle `command`'un
+LM Studio tarafından erişilebilir ve yürütülebilir olması gerekir. macOS'te GUI uygulamaları
+(ör. LM Studio) farklı PATH/permission ortamına sahip olabilir; tam absolute path kullanmak en güvenli yoldur.
 
 ## 6) Troubleshooting
 
@@ -107,6 +135,3 @@ script kendi sunucu URL'nizi ve (opsiyonel) header bilgilerinizi alıp size haz�
   erişilebilir olup olmadığını kontrol edin (localhost vs. container vs. WSL vs. port yönlendirmeleri).
 
 ---
-
-İsterseniz (A) otomatik deeplink scripti ekleyeyim ya da (B) sizin sunucu bilgilerinize göre
-ben bir deeplink üretip buraya koyayım. Hangisini istersiniz?
