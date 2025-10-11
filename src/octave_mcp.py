@@ -7,11 +7,12 @@ lightweight namespace for consumers that expect `import octave_mcp`.
 
 __all__ = ["__version__"]
 
-__version__ = "0.2.3"
+__version__ = "0.2.5"
 
 # Re-export package-level attributes
 try:
     from . import __version__ as _pkg_version  # type: ignore
+
     __version__ = _pkg_version
 except Exception:
     # fallback; keep the shim version

@@ -20,7 +20,7 @@ profile = "black"
 
 [project]
 name = "octave-mcp"
-version = "0.2.4"
+version = "0.2.5"
 requires-python = ">=3.11"
 description = "OctaveMCP: Secure GNU Octave code execution via MCP with FastMCP + FastAPI"
 readme = "README.md"
@@ -66,6 +66,6 @@ dev = [
 ]
 
 [project.scripts]
-octave-mcp = "octave_mcp.mcp_server:main"
+octave-mcp = "cli.cli:main"
 
 

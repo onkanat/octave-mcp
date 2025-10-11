@@ -37,6 +37,11 @@
   (önceden `src.mcp_server:main` idi); paket kurulduktan sonra script artık
   ModuleNotFoundError vermez.
 
+## v0.2.5 (2025-10-11)
+
+- Düzeltme: console script artık CLI modülünü (`cli.cli:main`) kullanır. Bu
+  sayede `octave-mcp` yüklendikten sonra komut satırı arayüzü doğrudan çalışır.
+
 ## v0.1.0 (ilk sürüm)
 
 - Proje iskeleti, model, servis, test ve API/CLI uç noktaları oluşturuldu.
