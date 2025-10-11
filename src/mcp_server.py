@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import os
-from base64 import b64encode
 import argparse
-import threading
 import logging
+import os
+import threading
+from base64 import b64encode
 from typing import Annotated, Any, Dict, List, Optional
 
 _LOG = logging.getLogger(__name__)
@@ -224,8 +224,8 @@ def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thre
         _LOG.exception("Failed to import ASGI app from src.api.endpoints")
         return None
 
-    import sys
     import subprocess
+    import sys
 
     def run_server() -> None:
         try:

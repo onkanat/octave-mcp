@@ -18,7 +18,6 @@ import shutil
 import sys
 from pathlib import Path
 
-
 DEFAULT_OUT = "mcp_command.generated.json"
 
 
