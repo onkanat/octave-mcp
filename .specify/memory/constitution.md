@@ -1,48 +1,58 @@
 
-# Octave MCP Constitution
-
+# OctaveMCP Constitution
 
 ## Core Principles
 
 ### I. Modülerlik ve Bağımsızlık
-Her ana özellik ayrı, bağımsız ve test edilebilir modül (örn. MCP STDIO, HTTP API, yürütücü, modeller, yardımcılar) olarak tasarlanır. Kod tekrarları ortak yardımcı dosyalara taşınır. Her modülün amacı ve kapsamı nettir.
+
+Her özellik bağımsız bir modül olarak başlar; modüller kendi başına test edilebilir,
+belgelenmiş ve tekrar kullanılabilir olmalıdır. Ortak yardımcılar ve kod tekrarları
+minimize edilmelidir.
 
 ### II. CLI ve API Arayüzü
-Her modül hem CLI hem de HTTP API üzerinden erişilebilir olmalıdır. Tüm giriş/çıkışlar metin tabanlıdır (stdin/args → stdout, hatalar stderr). JSON ve insan okunabilir formatlar desteklenir. API endpointleri açıkça dokümante edilir.
 
-### III. Test-First (TDD Zorunlu)
-Tüm yeni özellikler ve hata düzeltmeleri için önce test yazılır. Testler kullanıcı tarafından onaylanır, başarısız olur, ardından implementasyon yapılır. Red-Green-Refactor döngüsü zorunludur. smoke_test.py ile temel işlevler sürekli doğrulanır.
+Her modül CLI ve/veya HTTP API üzerinden erişilebilir olmalıdır. Giriş/çıkış protokolü
+(stdin/stdout, JSON, hata yönetimi) standartlaştırılmıştır.
+
+### III. Test-First (TDD)
+
+TDD zorunludur: Testler önce yazılır, kullanıcı onaylar, testler başarısız olur,
+ardından implementasyon yapılır. Red-Green-Refactor döngüsü sıkı şekilde uygulanır.
 
 ### IV. Entegrasyon ve Uçtan Uca Test
-Her yeni modül, API veya önemli değişiklikte entegrasyon ve uçtan uca testler zorunludur. Özellikle publish/grabcode zinciri, hata raporlama ve kaynak yönetimi için kapsamlı testler uygulanır.
+
+Yeni modül sözleşmeleri, sözleşme değişiklikleri, servisler arası iletişim ve ortak
+şemalar için entegrasyon testleri zorunludur.
 
 ### V. Gözlemlenebilirlik, Sürümleme, Sadelik
-Tüm çıktılar ve hatalar izlenebilir, loglanabilir ve referans ID ile takip edilebilir olmalıdır. Sürümleme MAJOR.MINOR.BUILD formatında yapılır. Her değişiklikte sürüm ve dokümantasyon güncellenir. Gereksiz karmaşıklıktan kaçınılır, YAGNI ilkesi uygulanır.
 
+Text I/O ve yapılandırılmış loglama ile hata ayıklanabilirlik sağlanır. Sürümleme
+MAJOR.MINOR.PATCH formatında yapılır. Sadelik ve YAGNI ilkeleri önceliklidir.
 
-## Ek Kısıtlar, Güvenlik ve Performans Standartları
+## Güvenlik, Performans ve Teknoloji Yığını
 
-- Tüm kodlar yalnızca GNU Octave uyumlu olmalı, MATLAB özel API kullanılmaz.
-- Her yürütme izole edilir; persistent mod opsiyoneldir ve güvenlik riski varsa devre dışı bırakılır.
-- CPU süresi, bellek, çıktı ve dosya boyutu limitleri zorunludur (resource limit).
-- Hata mesajları ve stack trace zorunlu, otomatik ipucu üretimi teşvik edilir.
-- Kodda vektörizasyon zorunludur; gereksiz döngü kullanımı uyarı üretir.
-- Grafik çıktılarında downsampling ve DPI kuralları uygulanır.
-- Paket yönetimi: Fonksiyon bulunamazsa otomatik paket kontrolü yapılır.
-- Tüm endpointler ve araçlar için rate limit ve otomatik temizlik mekanizması bulunur.
+Tüm kodlar sandbox ortamında çalıştırılır, kaynak limitleri ve rate limiting uygulanır.
+Otomatik temizlik ve hata blokları zorunludur. Teknoloji yığını: Python 3.11+,
+FastAPI, GNU Octave.
 
+## Geliştirme Süreci ve Kalite Kontrol
 
-## Geliştirme Akışı, İnceleme ve Kalite Kapıları
-
-- Tüm kod değişiklikleri test ile başlar (TDD).
-- Kod gözden geçirme zorunludur; her PR/merge öncesi test ve dokümantasyon kontrol edilir.
-- Sürüm geçişlerinde checklist uygulanır: testler, dokümantasyon, roadmap, güvenlik limitleri, yeni araçlar.
-- Her sürümde değişiklik özeti ve geriye dönük uyumluluk notu eklenir.
-- Öncelik sırası: Güvenlik & tutarlılık > Hata raporu > Performans > Kullanıcı deneyimi > Ek özellikler.
-
+Kod incelemesi, test kapıları ve deployment onayı zorunludur. Tüm değişiklikler PR
+ile yapılır, compliance review gereklidir.
 
 ## Governance
 
-Bu anayasa, tüm proje uygulamalarının üzerinde yer alır. Her değişiklikte dokümantasyon, onay ve geçiş planı zorunludur. Tüm PR ve incelemelerde anayasaya uyum kontrol edilir. Karmaşıklık gerekçelendirilmelidir. Geliştirme sırasında specify.txt ve CLAUDE.md rehberleri referans alınır.
+Bu anayasa tüm diğer uygulama ve dokümantasyon pratiklerinin üstündedir.
+Değişiklikler PR ile yapılır, onay ve migration planı gerektirir. Sürüm değişiklikleri
+semantik kurallara göre yapılır. Tüm PR/review'larda compliance kontrolü zorunludur.
 
-**Version**: 1.0.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2025-09-17
+<!--
+Sync Impact Report:
+Version change: 1.0.0 → 1.0.1
+Modified principles: placeholder → gerçek ilke metinleri
+Added sections: Güvenlik, Performans ve Teknoloji Yığını; Geliştirme Süreci ve Kalite Kontrol
+Templates requiring updates: plan-template.md ✅, spec-template.md ✅, tasks-template.md ✅
+Follow-up TODOs: TODO(RATIFICATION_DATE): İlk onay tarihi bilinmiyor, eklenmeli
+-->
+
+**Version**: 1.0.1 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2025-10-11

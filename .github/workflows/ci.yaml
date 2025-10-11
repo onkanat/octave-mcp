@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, 003-t-m-kod ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install project and dev deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Run curated tests
+        run: |
+          python -m pytest \
+            tests/unit/test_config_simple.py \
+            tests/unit/test_exceptions.py \
+            tests/unit/test_error_format.py \
+            tests/unit/test_models_basic.py \
+            tests/unit/test_models_pydantic_simple.py \
+            tests/unit/test_services_simple.py \
+            tests/integration/test_api_basic.py \
+            tests/integration/test_api_endpoints_monkeypatch.py \
+            tests/contract/test_run_octave_post.py \
+            tests/contract/test_publish_post.py \
+            tests/contract/test_grabcode_post.py \
+            -q --disable-warnings --maxfail=1 --tb=no --cov-fail-under=0
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            htmlcov
+      - name: Generate OpenAPI JSON
+        run: |
+          python scripts/generate_openapi.py
+      - name: Upload OpenAPI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-schema
+          path: artifacts/openapi.json

@@ -1,151 +1,396 @@
-import os
+"""
+Modern FastAPI endpoints for octave-mcp service.
+"""
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+import logging
+from typing import Dict, List
 
-from services.cleanup_service import CleanupService
-from services.grabcode_service import GrabcodeService
-from services.octave_runner import OctaveRunner
-from services.publish_service import PublishService
-from utils.config import get_env_int, get_env_str
-from utils.error_format import build_error_block
-from utils.resource_limits import ResourceLimiter
-from utils.vectorization import analyze_vectorization
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse, JSONResponse
 
-# Use package-relative imports so this module can be imported as
-# `from src.api.endpoints import app` when the repo root is on sys.path.
-from .middleware import RateLimitMiddleware
+from config import get_settings
+from exceptions import ExecutionError, NotFoundError, ServiceError, TimeoutError, ValidationError
+from models.requests import CleanupRequest, GrabcodeRequest, PublishRequest, RunRequest
+from models.responses import CleanupResponse, GrabcodeResponse, PublishResponse, RunResponse
+from models.entities import ResourceLimits
+from services.octave import OctaveService
+from services.publish import PublishService
+from services.session import SessionService
 
-app = FastAPI()
-# Rate limit ayarlarını .env'den oku (varsayılan: 100 istek / 60 sn)
-_max_requests = get_env_int("MCP_RATE_LIMIT_MAX", 100)
-_window_seconds = get_env_int("MCP_RATE_LIMIT_WINDOW", 60)
-app.add_middleware(
-    RateLimitMiddleware,
-    max_requests=_max_requests,
-    window_seconds=_window_seconds,
-)
-_octave_runner = OctaveRunner()
-_publish_service = PublishService()
-_grabcode_service = GrabcodeService()
-# prefer explicit None default and fall back to a sane path
-_runs_root = get_env_str("MCP_RUNS_ROOT", None) or os.path.abspath("runs")
-_retention_days = get_env_int("MCP_RUNS_RETENTION_DAYS", 0)
-_cleanup_service = CleanupService(
-    _runs_root,
-    days=_retention_days if _retention_days > 0 else None,
-)
+logger = logging.getLogger(__name__)
 
-# Basit in-memory session -> kod haritası
-session_code_store = {}
+# Create router
+router = APIRouter()
+
+# Service dependencies
+octave_service = OctaveService()
+publish_service = PublishService()
+session_service = SessionService()
 
 
-# --- Request/Response Models (Stub) ---
-class RunRequest(BaseModel):
-    code: str
-    session_id: str | None = None
+def get_settings_dependency():
+    """Dependency for settings."""
+    return get_settings()
 
 
-class PublishRequest(BaseModel):
-    code: str
-    session_id: str | None = None
+@router.post("/run", response_model=RunResponse)
+async def run_octave_code(
+    request: RunRequest, settings=Depends(get_settings_dependency)
+) -> RunResponse:
+    """
+    Execute Octave/Python code with resource limits.
 
+    Args:
+        request: Code execution request
+        settings: Application settings
 
-class GrabcodeRequest(BaseModel):
-    session_id: str
+    Returns:
+        Execution result with output and metadata
 
-
-# --- Endpoints (Stub) ---
-@app.post("/run_octave")
-def run_octave(req: RunRequest):
-    code = req.code
-    # Kaynak limitlerini .env'den oku, güvenli varsayılanlar uygula
-    cpu_limit = get_env_int("MCP_CPU_LIMIT", 0) or None
-    mem_mb = get_env_int("MCP_MEMORY_MB", 0) or None
-    max_chars = get_env_int("MCP_MAX_OUTPUT_CHARS", 20000)
-    timeout_s = get_env_int("MCP_TIMEOUT_SECONDS", 10)
-    limits = ResourceLimiter(
-        cpu_time_limit=cpu_limit,
-        memory_limit_mb=mem_mb,
-        max_output_chars=max_chars,
-        max_image_size_bytes=0,
-        timeout=timeout_s,
-    )
-    result = _octave_runner.run_code(code, limits)
-
-    # Bilgilendirici vektörizasyon uyarıları (sadece ek alan, sözleşmeyi bozmaz)
+    Raises:
+        HTTPException: On validation or execution errors
+    """
     try:
-        vec_warn = analyze_vectorization(code)
-        if isinstance(result, dict):
-            result["vectorization_warnings"] = vec_warn
-    except Exception:
-        pass
+        # Derive resource limits (request overrides settings)
+        limits = request.resource_limits or ResourceLimits(
+            cpu_time_limit=settings.cpu_limit_seconds,
+            memory_limit_mb=settings.memory_limit_mb,
+            max_output_chars=settings.max_output_chars,
+            max_image_size_bytes=settings.max_image_size_bytes,
+            timeout=settings.timeout_seconds,
+        )
 
-    # Başarısızlıkta standart hata bloğu ekle (sözleşmeye ek alan)
+        # Execute code using service
+        run_result = await octave_service.execute_code(
+            code=request.code,
+            resource_limits=limits,
+            session_id=request.session_id,
+            include_image_paths=settings.is_vision_model,
+        )
+
+        # Update session if provided
+        if request.session_id:
+            try:
+                await session_service.update_session(request.session_id, increment_run_count=True)
+            except NotFoundError:
+                # Session doesn't exist, create it
+                await session_service.create_session(request.session_id)
+
+        # Map domain Run to API RunResponse
+        return RunResponse(
+            success=run_result.success,
+            stdout=run_result.stdout,
+            stderr=run_result.stderr,
+            exit_code=run_result.exit_code,
+            runtime_seconds=run_result.runtime_seconds,
+            # images: RunResponse ImageResult bekliyor; şimdilik boş liste döndürüyoruz.
+            images=[],
+            vectorization_warnings=None,
+            error=None,
+        )
+
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error": e.message, "code": e.error_code, "details": e.details},
+        )
+    except TimeoutError as e:
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail={"error": e.message, "code": e.error_code, "timeout": e.timeout_seconds},
+        )
+    except ExecutionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": e.message,
+                "code": e.error_code,
+                "exit_code": e.exit_code,
+                "stdout": e.stdout,
+                "stderr": e.stderr,
+            },
+        )
+    except ServiceError as e:
+        logger.error(f"Service error in run endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in run endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "Internal server error", "code": "INTERNAL_ERROR"},
+        )
+
+
+@router.post("/publish", response_model=PublishResponse)
+async def publish_run(
+    request: PublishRequest, settings=Depends(get_settings_dependency)
+) -> PublishResponse:
+    """
+    Publish a run result for sharing.
+
+    Args:
+        request: Publish request with run data
+        settings: Application settings
+
+    Returns:
+        Publication details with share URL
+
+    Raises:
+        HTTPException: On validation or service errors
+    """
     try:
-        if isinstance(result, dict) and not result.get("success", False):
-            stderr = result.get("stderr", "") or ""
-            stdout = result.get("stdout", "") or ""
-            err_type = "timeout" if "TimeoutExpired" in stderr else "runtime_error"
-            result["error"] = build_error_block(
-                type=err_type,
-                message=stderr.strip() or "Execution failed",
-                session_id=req.session_id,
-                run_id=None,
-                stdout_truncated=("...[truncated]" in stdout),
-                stderr_truncated=("...[truncated]" in stderr),
-                resource_violation=None,
-                details={
-                    "exit_code": result.get("exit_code"),
-                },
+        # Derive resource limits (request overrides settings)
+        limits = request.resource_limits or ResourceLimits(
+            cpu_time_limit=settings.cpu_limit_seconds,
+            memory_limit_mb=settings.memory_limit_mb,
+            max_output_chars=settings.max_output_chars,
+            max_image_size_bytes=settings.max_image_size_bytes,
+            timeout=settings.timeout_seconds,
+        )
+
+        # First execute the code if not already done
+        run_result = await octave_service.execute_code(
+            code=request.code,
+            resource_limits=limits,
+            session_id=request.session_id,
+            include_image_paths=True,  # Always include images for publishing
+        )
+
+        # Publish the result
+        publish_result = await publish_service.publish_run(
+            run=run_result,
+            title=None,
+            description=None,
+            expires_hours=24,
+        )
+
+        # PublishResponse modeli html_b64 vb bekliyor.
+        # Dosya tabanlı yayınlama var; bu endpoint için basit bir özet üretelim.
+        import base64
+
+        html_content = f"<html><body><pre>{run_result.stdout}</pre></body></html>"
+        html_b64 = base64.b64encode(html_content.encode("utf-8")).decode("utf-8")
+
+        return PublishResponse(
+            html_b64=html_b64,
+            html_truncated=False,
+            html_original_size=len(html_content.encode("utf-8")),
+            publish_dir=str(settings.publish_dir),
+            html_name=f"{publish_result.share_id}.html",
+            images=[],
+            warnings=[],
+            error=None,
+        )
+
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error": e.message, "code": e.error_code, "details": e.details},
+        )
+    except ServiceError as e:
+        logger.error(f"Service error in publish endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in publish endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "Internal server error", "code": "INTERNAL_ERROR"},
+        )
+
+
+@router.get("/published/{share_id}")
+async def get_published_run(share_id: str) -> JSONResponse:
+    """
+    Retrieve published run by share ID.
+
+    Args:
+        share_id: Share identifier
+
+    Returns:
+        Published run data and metadata
+
+    Raises:
+        HTTPException: If share not found or expired
+    """
+    try:
+        result = await publish_service.get_published_run(share_id)
+        return JSONResponse(content=result)
+
+    except NotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": e.message, "code": e.error_code},
+        )
+    except ServiceError as e:
+        logger.error(f"Service error in get published endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
+
+
+@router.get("/published/{share_id}/images/{filename}")
+async def get_published_image(share_id: str, filename: str) -> FileResponse:
+    """
+    Serve published image files.
+
+    Args:
+        share_id: Share identifier
+        filename: Image filename
+
+    Returns:
+        Image file response
+
+    Raises:
+        HTTPException: If image not found
+    """
+    try:
+        from pathlib import Path
+
+        settings = get_settings()
+        image_path = Path(settings.publish_dir) / share_id / "images" / filename
+
+        if not image_path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "Image not found", "code": "IMAGE_NOT_FOUND"},
             )
-    except Exception:
-        pass
 
-    return result
+        return FileResponse(path=str(image_path), media_type="image/png", filename=filename)
 
-
-@app.post("/publish")
-def publish(req: PublishRequest):
-    # Koddan dummy HTML üret, base64 ile encode et
-    return _publish_service.publish(req.code, req.session_id)
-
-
-@app.post("/grabcode")
-def grabcode(req: GrabcodeRequest):
-    return _grabcode_service.grab_code(req.session_id)
+    except Exception as e:
+        logger.error(f"Error serving image {share_id}/{filename}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "Internal server error", "code": "INTERNAL_ERROR"},
+        )
 
 
-class CleanupRequest(BaseModel):
-    dry_run: bool = True
-    force: bool = False
-    max_age_hours: int | None = None
-    max_age_days: int | None = None
-    session_id: str | None = None
+@router.post("/grabcode", response_model=GrabcodeResponse)
+async def grab_published_code(request: GrabcodeRequest) -> GrabcodeResponse:
+    """
+    Extract code from published run.
+
+    Args:
+        request: Grabcode request with share ID
+
+    Returns:
+        Code content and metadata
+
+    Raises:
+        HTTPException: If share not found or expired
+    """
+    try:
+        # Get published run data
+        result = await publish_service.get_published_run(request.share_id)
+        run_data = result["run"]
+
+        import base64
+
+        code_text = run_data.get("code", "")
+        code_b64 = base64.b64encode(code_text.encode("utf-8")).decode("utf-8")
+
+        return GrabcodeResponse(
+            code=code_text,
+            code_b64=code_b64,
+            line_count=len(code_text.splitlines()) if code_text else 0,
+            warnings=[],
+        )
+
+    except NotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": e.message, "code": e.error_code},
+        )
+    except ServiceError as e:
+        logger.error(f"Service error in grabcode endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
 
 
-@app.post("/admin/cleanup")
-def admin_cleanup(req: CleanupRequest):
-    allow_force = os.environ.get("MCP_ALLOW_FORCE_DELETE", "false").lower() in ("1", "true", "yes")
-    if req.force and not allow_force:
-        return {
-            "deleted_runs": 0,
-            "deleted_sessions": 0,
-            "dry_run": req.dry_run,
-            "errors": [
-                {
-                    "path": None,
-                    "error": (
-                        "Force delete disabled by policy. "
-                        "Set MCP_ALLOW_FORCE_DELETE=true to enable."
-                    ),
-                }
-            ],
-        }
-    return _cleanup_service.cleanup(
-        dry_run=req.dry_run,
-        force=req.force,
-        max_age_hours=req.max_age_hours,
-        max_age_days=req.max_age_days,
-        session_id=req.session_id,
-    )
+@router.post("/cleanup", response_model=CleanupResponse)
+async def cleanup_resources(request: CleanupRequest) -> CleanupResponse:
+    """
+    Clean up old resources (sessions, publications, etc.).
+
+    Args:
+        request: Cleanup request with age settings
+
+    Returns:
+        Cleanup operation results
+
+    Raises:
+        HTTPException: On service errors
+    """
+    try:
+        # Şu an yalnızca session temizliği uygulanıyor; run dosyaları için 0 döneriz.
+        # max_age: saat/dakika alanlarından türet.
+        age_hours = (
+            request.max_age_hours
+            if request.max_age_hours is not None
+            else (request.max_age_days * 24 if request.max_age_days is not None else 24)
+        )
+
+        deleted_sessions = 0
+        if not request.dry_run:
+            deleted_sessions = await session_service.cleanup_old_sessions(max_age_hours=age_hours)
+
+        return CleanupResponse(
+            deleted_runs=0,
+            deleted_sessions=deleted_sessions,
+            dry_run=request.dry_run,
+            errors=[],
+        )
+
+    except ServiceError as e:
+        logger.error(f"Service error in cleanup endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in cleanup endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "Internal server error", "code": "INTERNAL_ERROR"},
+        )
+
+
+@router.get("/sessions", response_model=List[Dict])
+async def list_sessions(limit: int = 50, offset: int = 0) -> List[Dict]:
+    """
+    List active sessions.
+
+    Args:
+        limit: Maximum number of results
+        offset: Number of results to skip
+
+    Returns:
+        List of session summaries
+
+    Raises:
+        HTTPException: On service errors
+    """
+    try:
+        return await session_service.list_sessions(limit=limit, offset=offset)
+
+    except ServiceError as e:
+        logger.error(f"Service error in list sessions endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": e.message, "code": e.error_code},
+        )
+
+
+@router.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy", "service": "octave-mcp"}

@@ -2,10 +2,9 @@ import os
 import shutil
 from base64 import b64encode
 from typing import Dict
-
 from utils.config import get_env_str
-
 from .store import session_code_store
+from utils.file_io import write_file
 
 
 class PublishService:
@@ -68,12 +67,21 @@ class PublishService:
 
         html_name = "script_publish.html"
         html_path = os.path.join(publish_dir, html_name)
+        # Güvenli dosya yazımı: file_io adapter
         try:
-            with open(html_path, "wb") as f:
-                f.write(html_bytes)
-        except Exception:
-            # Disk yazımı başarısız olsa bile API sözleşmesini koru
-            pass
+            write_file(html_path, html_bytes, mode="binary", overwrite=True)
+        except Exception as e:
+            # MCP error block döndür
+            return {
+                "error": str(e),
+                "html_b64": html_b64,
+                "html_truncated": False,
+                "html_original_size": len(html_bytes),
+                "publish_dir": publish_dir,
+                "html_name": html_name,
+                "images": images_relpaths,
+                "warnings": ["HTML dosyası yazılamadı: " + str(e)],
+            }
 
         return {
             "html_b64": html_b64,
