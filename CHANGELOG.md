@@ -1,6 +1,16 @@
 
 # Changelog
 
+## v0.3.0 (2025-10-11)
+
+Öne çıkanlar:
+
+- Tüm kod tabanı modern Python standartlarına göre yeniden yazıldı.
+- Global MCPException handler ile tüm HTTP hataları standard error block (docs/ERROR_SCHEMA.md) formatında.
+- Unit, integration, contract ve edge-case testleri güncellendi; coverage yüksek.
+- Dokümantasyon: Migration rehberi ve API hata örnekleri eklendi (docs/README.md, docs/API.md).
+- CI/CD: Curated test set, coverage raporu ve OpenAPI artifact üretimi stabilize edildi.
+
 ## v0.2.0 (2025-09-17)
 
 - Publish: Üretilen HTML artık figür PNG’lerini gömülü olarak gösterir;
