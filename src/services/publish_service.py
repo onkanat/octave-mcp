@@ -3,7 +3,7 @@ import shutil
 from base64 import b64encode
 from typing import Dict
 
-from utils.config import get_env_str
+from ..utils.config import get_env_str
 
 from .store import session_code_store
 

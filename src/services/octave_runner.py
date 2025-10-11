@@ -5,7 +5,7 @@ import tempfile
 import time
 from typing import Dict
 
-from utils.logging import logger
+from ..utils.logging import logger
 
 
 class OctaveRunner:

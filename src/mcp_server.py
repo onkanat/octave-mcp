@@ -11,12 +11,22 @@ _LOG = logging.getLogger(__name__)
 
 from mcp.server.fastmcp import FastMCP
 
-from services.cleanup_service import CleanupService
-from services.grabcode_service import GrabcodeService
-from services.octave_runner import OctaveRunner
-from services.publish_service import PublishService
-from utils.config import get_env_int, get_env_str
-from utils.resource_limits import ResourceLimiter
+try:
+    # When imported as a package (recommended): `import src.mcp_server`
+    from .services.cleanup_service import CleanupService
+    from .services.grabcode_service import GrabcodeService
+    from .services.octave_runner import OctaveRunner
+    from .services.publish_service import PublishService
+    from .utils.config import get_env_int, get_env_str
+    from .utils.resource_limits import ResourceLimiter
+except Exception:
+    # When executed as a script: `python src/mcp_server.py` (local dev)
+    from services.cleanup_service import CleanupService  # type: ignore
+    from services.grabcode_service import GrabcodeService  # type: ignore
+    from services.octave_runner import OctaveRunner  # type: ignore
+    from services.publish_service import PublishService  # type: ignore
+    from utils.config import get_env_int, get_env_str  # type: ignore
+    from utils.resource_limits import ResourceLimiter  # type: ignore
 
 mcp = FastMCP("octave_mcp")
 
@@ -150,12 +160,45 @@ def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thre
         _LOG.warning("uvicorn not installed; HTTP API will not be started")
         return None
 
-    cfg = uvicorn.Config("src.api.endpoints:app", host=host, port=port, log_level="info")
-    server = uvicorn.Server(cfg)
+    # Ensure repo root is on sys.path so imports like `src.api.endpoints` work
+    try:
+        import sys
+        from pathlib import Path
+
+        repo_root = Path.cwd().resolve()
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+    except Exception:
+        pass
+
+    # Import the FastAPI `app` object directly to avoid import-by-string errors
+    try:
+        from src.api.endpoints import app as asgi_app
+    except Exception:
+        _LOG.exception("Failed to import ASGI app from src.api.endpoints")
+        return None
+
+    import sys
+    import subprocess
 
     def run_server() -> None:
         try:
-            server.run()
+            cmd = [sys.executable, "-m", "uvicorn", "src.api.endpoints:app", "--host", host, "--port", str(port)]
+            _LOG.info("Starting uvicorn subprocess: %s", " ".join(cmd))
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            # Attach proc to thread for potential inspection
+            try:
+                threading.current_thread().proc = proc  # type: ignore[attr-defined]
+            except Exception:
+                pass
+            # Stream subprocess output to our logger
+            if proc.stdout is not None:
+                for line in iter(proc.stdout.readline, b""):
+                    try:
+                        _LOG.info(line.decode("utf-8", errors="replace").rstrip())
+                    except Exception:
+                        pass
+            proc.wait()
         except Exception:
             _LOG.exception("HTTP server failed")
 
@@ -197,8 +240,7 @@ def _print_lmstudio_suggestions() -> None:
     }
 
     print(
-        "\n=== LM Studio MCP suggestions (copy-paste into LM Studio "
-        "or encode as deeplink) ===\n"
+        "\n=== LM Studio MCP suggestions (copy-paste into LM Studio or encode as deeplink) ===\n"
     )
     print("--- Portable (use if you've installed octave-mcp via pip) ---")
     print(json.dumps(portable, indent=2, ensure_ascii=False))
