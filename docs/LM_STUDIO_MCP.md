@@ -103,15 +103,42 @@ ekledim: `mcp_command.json` (repo kökünde). Dosya, bu projenin tipik çalışm
 ayarlandı — lütfen kendi çalışma dizininize göre `command` ve `args` içindeki absolute yolları
 güncelleyin.
 
-Özellikle kontrol etmeniz gerekenler:
 
-- `command` — virtualenv içindeki Python yürütülebilirinin tam yolu (ör. `/path/to/.venv/bin/python`).
-- `args` — `src/mcp_server.py` dosyasının absolute yolu.
+Özellikle kontrol etmeniz gerekenler (manuel düzenleme gerekirse):
+
+- `command` — virtualenv içindeki Python yürütülebilirinin tam yolu veya pip'in yüklediği `octave-mcp` console-script adı.
+- `args` — `src/mcp_server.py` dosyasının absolute yolu (yalnızca `python` yerine -m kullanmıyorsanız).
 - `env` — `MCP_RUNS_ROOT`, `TMPDIR`, zaman aşımı ve resource limitleri gibi ortam değişkenleri.
 
-LM Studio'ya bu komut-tabanlı MCP'yi eklemek için ya `mcp_command.json` içeriğini doğrudan
-`Install > Edit mcp.json` editörüne yapıştırın ya da aynı içeriği base64 ile encode edip
-deeplink olarak kullanın (bkz. aşağıdaki Deeplink örneği).
+Önerilen akış (taşınabilir kullanım):
+
+1. Eğer kullanıcılar paketi `pip install octave-mcp` ile kuruyorsa, LM Studio komut olarak doğrudan
+  `octave-mcp` console-script'ini çağırabilir. Bu durum için repo kökünde `mcp_command.json` taşınabilir bir
+  örnek içerir (komut: `octave-mcp`).
+
+2. LM Studio GUI ortamı console-script'i PATH'te bulamayabilir. Bu durumda repo'daki yardımcı script'i
+  çalıştırın: `scripts/generate_mcp_command.py` — script console-script'i tespit ederse onu kullanır, aksi halde
+  `python -m octave_mcp.mcp_server` tarzı absolute çalıştırma komutu üretir ve `mcp_command.generated.json`
+  dosyasına yazar.
+
+3. Üretilen `mcp_command.generated.json`'ı LM Studio'ya yapıştırın ya da base64 encode edip deeplink ile ekleyin.
+
+Örnek: generator kullanımı
+
+```bash
+python3 scripts/generate_mcp_command.py --out mcp_command.generated.json
+```
+
+Ve deeplink oluşturmak için:
+
+```bash
+python3 - <<'PY'
+import base64, json
+with open('mcp_command.generated.json','rb') as f:
+  encoded = base64.urlsafe_b64encode(f.read()).decode()
+print(f"lmstudio://add_mcp?name=octave-mcp-command&config={encoded}")
+PY
+```
 
 Deeplink (komut-tabanlı config'i encode etmek için örnek):
 

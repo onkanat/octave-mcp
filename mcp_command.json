@@ -7,15 +7,14 @@
       ]
     },
     "octave_execute": {
-      "command": "/Users/hakankilicaslan/Prompts/mcp_new/.venv/bin/python",
-      "args": [
-        "/Users/hakankilicaslan/Prompts/mcp_new/src/mcp_server.py"
-      ],
+      "#note": "Portable config: prefer the console-script `octave-mcp` installed by pip. If LM Studio can't find it, run scripts/generate_mcp_command.py to produce an absolute-path JSON.",
+      "command": "octave-mcp",
+      "args": [],
       "env": {
         "PYTHONUNBUFFERED": "1",
         "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}",
-        "MCP_RUNS_ROOT": "/Users/hakankilicaslan/Prompts/mcp_new/runs",
-        "TMPDIR": "/Users/hakankilicaslan/Prompts/mcp_new/runs",
+        "MCP_RUNS_ROOT": "runs",
+        "TMPDIR": "runs",
         "OCTAVE_RUNNER_MODE": "octave",
         "MCP_IS_VISION_MODEL": "false",
         "MCP_RATE_LIMIT_MAX": "100",

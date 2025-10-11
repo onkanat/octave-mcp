@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "octave_execute": {
+      "#note": "Fill in either `command` with an absolute executable path or use the console script name `octave-mcp`.",
+      "command": "octave-mcp",
+      "args": [],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}",
+        "MCP_RUNS_ROOT": "runs",
+        "TMPDIR": "runs"
+      }
+    }
+  }
+}
