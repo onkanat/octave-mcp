@@ -27,6 +27,10 @@
 
 - Küçük düzeltme: top-level import uyumluluğu için `octave_mcp` shim eklendi.
 
+## v0.2.3 (2025-10-11)
+
+- Paket içindeki top-level modülün kesin olarak dahil edilmesi için yapılandırma düzeltildi ve sürüm 0.2.3 yapıldı.
+
 ## v0.1.0 (ilk sürüm)
 
 - Proje iskeleti, model, servis, test ve API/CLI uç noktaları oluşturuldu.
