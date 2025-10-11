@@ -31,6 +31,12 @@
 
 - Paket içindeki top-level modülün kesin olarak dahil edilmesi için yapılandırma düzeltildi ve sürüm 0.2.3 yapıldı.
 
+## v0.2.4 (2025-10-11)
+
+- Düzeltme: console script entry point `octave-mcp` artık doğru modul yolunu kullanır
+  (önceden `src.mcp_server:main` idi); paket kurulduktan sonra script artık
+  ModuleNotFoundError vermez.
+
 ## v0.1.0 (ilk sürüm)
 
 - Proje iskeleti, model, servis, test ve API/CLI uç noktaları oluşturuldu.
