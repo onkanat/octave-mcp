@@ -217,12 +217,7 @@ def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thre
     except Exception:
         pass
 
-    # Import the FastAPI `app` object directly to avoid import-by-string errors
-    try:
-        from src.api.endpoints import app as asgi_app
-    except Exception:
-        _LOG.exception("Failed to import ASGI app from src.api.endpoints")
-        return None
+    # FastAPI app will be imported by uvicorn when running subprocess
 
     import subprocess
     import sys
