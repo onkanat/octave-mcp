@@ -1,0 +1,112 @@
+# LM Studio — MCP integration with OctaveMCP
+
+Bu rehber LM Studio'nun MCP (Model Context Protocol) sunucularını nasıl ekleyeceğinizi ve
+OctaveMCP (bu repo) ile nasıl entegre edeceğinizi gösterir. Ayrıca LM Studio'ya tek-tıkla
+ekleme (deeplink) nasıl oluşturulur örnekleri içerir.
+
+## Önemli güvenlik notu
+
+- MCP sunucuları uzaktan kod çalıştırma yetkisine sahip olabilir. Bilinmeyen/şüpheli kaynaklardan
+  MCP kurmayın.
+
+## 1) `mcp.json` ile manuel ekleme
+
+LM Studio program sekmesinde `Install > Edit mcp.json` ile uygulama içi editörde `mcp.json`
+dosyasına yeni MCP sunucuları ekleyebilirsiniz. `mcp.json` içinde sadece `"mcpServers": { ... }`
+içeriğini kopyalayıp yapıştırın.
+
+Örnek OctaveMCP girişi:
+
+```json
+{
+  "mcpServers": {
+    "octave-mcp-local": {
+      "url": "http://127.0.0.1:8000",
+      "headers": {
+        "Authorization": "Bearer <OPTIONAL_TOKEN_IF_USED>"
+      }
+    }
+  }
+}
+```
+
+Notlar:
+
+- `url` alanı OctaveMCP sunucunuzun base URL'sidir (ör. `http://127.0.0.1:8000`).
+- Eğer OctaveMCP'niz erişim kontrolü (API token) kullanıyorsa `headers.Authorization` içine
+  `Bearer <TOKEN>` ekleyin.
+
+## 2) Deeplink (tek-tıkla ekleme)
+LM Studio `lmstudio://add_mcp` deeplink protokolünü destekler. Deeplink şu formattadır:
+
+```
+lmstudio://add_mcp?name=<NAME>&config=<BASE64_JSON>
+```
+
+Örnek: OctaveMCP için JSON kısmı şöyle olsun (yalnızca `mcpServers` içeriğini verin):
+
+```json
+{
+  "octave-mcp-local": {
+    "url": "http://127.0.0.1:8000",
+    "headers": {}
+  }
+}
+```
+
+Bu JSON'u base64 encode edip deeplink oluşturabilirsiniz. Terminal örneği (macOS / Linux):
+
+```bash
+python3 - <<'PY'
+import base64, json
+cfg = {
+  "octave-mcp-local": {
+    "url": "http://127.0.0.1:8000",
+    "headers": {}
+  }
+}
+encoded = base64.urlsafe_b64encode(json.dumps(cfg).encode()).decode()
+print(f"lmstudio://add_mcp?name=octave-mcp-local&config={encoded}")
+PY
+```
+
+Bu bağlantıyı tarayıcıda açarsanız (ve LM Studio yüklü ise) uygulama açılır ve server eklenir.
+
+## 3) LM Studio içinde test çağrıları (örnek)
+
+OctaveMCP yerelde çalışıyorsa (`http://127.0.0.1:8000`) LM Studio üzerinden ekledikten sonra
+modelden veya Tools bölümünden HTTP isteği tetikleyebilirsiniz. Doğrudan curl ile test:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/run_octave" \
+  -H "Content-Type: application/json" \
+  -d '{"code":"disp(2+2)","session_id":"test-session-1"}'
+```
+
+Başka örnek endpoint'ler:
+ - `/publish`  — kodu HTML'e dönüştürüp kaydeder
+ - `/grabcode` — bir session için son yayınlanan kodu getirir
+
+## 4) LM Studio Tool konfigurasyonu (özet)
+
+- Tool name: OctaveMCP Run
+- Method: POST
+- URL: `http://127.0.0.1:8000/run_octave`
+- Body (JSON): `{"code":"{{user_input}}","session_id":"{{session_id}}"}`
+
+## 5) Otomatik deeplink oluşturucu (opsiyonel)
+
+İsterseniz repo'ya küçük bir script (`scripts/generate_lm_deeplink.py`) ekleyebilirim; bu
+script kendi sunucu URL'nizi ve (opsiyonel) header bilgilerinizi alıp size hazır deeplink
+üretecek.
+
+## 6) Troubleshooting
+
+- Eğer LM Studio deeplink açılmazsa: LM Studio sürümünüz 0.3.17 veya üstü olduğundan emin olun.
+- Eğer MCP ekleniyor fakat çağrı başarısız oluyorsa: OctaveMCP erişim URL'sinin LM Studio ortamından
+  erişilebilir olup olmadığını kontrol edin (localhost vs. container vs. WSL vs. port yönlendirmeleri).
+
+---
+
+İsterseniz (A) otomatik deeplink scripti ekleyeyim ya da (B) sizin sunucu bilgilerinize göre
+ben bir deeplink üretip buraya koyayım. Hangisini istersiniz?
