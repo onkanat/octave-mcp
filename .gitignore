@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Generated MCP config (user-specific absolute paths)
+mcp_command.generated.json
+
 # C extensions
 *.so
 
