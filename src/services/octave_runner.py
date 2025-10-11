@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import time
 from typing import Dict
-
+from utils.file_io import write_file
 from utils.logging import logger
 
 
@@ -86,10 +86,10 @@ class OctaveRunner:
 
         # Önce kodu temizle ve validate et
         cleaned_code = self.clean_octave_code(code)
-        
+
         if self.mode == "octave":
             is_valid, validation_error = self.validate_octave_syntax(cleaned_code)
-            
+
             if not is_valid:
                 return {
                     "success": False,
@@ -99,7 +99,7 @@ class OctaveRunner:
                     "runtime_seconds": 0.0,
                     "images": [],
                 }
-            
+
             # Temizlenmiş kodu kullan
             code_to_run = cleaned_code
         else:
@@ -119,8 +119,19 @@ class OctaveRunner:
                 tmp_dir = tempfile.mkdtemp(prefix="octave_run_")
                 script_path = os.path.join(tmp_dir, "script.m")
                 wrapper_path = os.path.join(tmp_dir, "wrapper.m")
-                with open(script_path, "w") as f:
-                    f.write(code_to_run)
+                # Güvenli dosya yazımı
+                try:
+                    write_file(script_path, code_to_run, mode="text", overwrite=True)
+                except Exception as e:
+                    logger.error(f"Script dosyası yazılamadı: {str(e)}")
+                    return {
+                        "success": False,
+                        "stdout": "",
+                        "stderr": str(e),
+                        "exit_code": -1,
+                        "runtime_seconds": 0.0,
+                        "images": [],
+                    }
                 # wrapper: kullanıcı kodunu çalıştır, mevcut figürleri PNG olarak kaydet
                 base = os.path.join(tmp_dir, "fig")
 
@@ -151,15 +162,40 @@ class OctaveRunner:
 
                 logger.debug(f"Generated wrapper code: {wrapper_code[:200]}...")
 
-                with open(wrapper_path, "w") as f:
-                    f.write(wrapper_code)
+                # Güvenli dosya yazımı
+                try:
+                    write_file(wrapper_path, wrapper_code, mode="text", overwrite=True)
+                except Exception as e:
+                    logger.error(f"Wrapper dosyası yazılamadı: {str(e)}")
+                    return {
+                        "success": False,
+                        "stdout": "",
+                        "stderr": str(e),
+                        "exit_code": -1,
+                        "runtime_seconds": 0.0,
+                        "images": [],
+                    }
                 cmd = [self.octave_bin, "--quiet", "--no-gui", wrapper_path]
                 used_octave = True
             else:
                 # Varsayılan: Python ile çalıştır (mevcut testlerle uyumlu)
-                with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                    f.write(code_to_run)
-                    script_path = f.name
+                # Güvenli dosya yazımı
+                tmp_py_path = tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".py", delete=False
+                ).name
+                try:
+                    write_file(tmp_py_path, code_to_run, mode="text", overwrite=True)
+                except Exception as e:
+                    logger.error(f"Python script dosyası yazılamadı: {str(e)}")
+                    return {
+                        "success": False,
+                        "stdout": "",
+                        "stderr": str(e),
+                        "exit_code": -1,
+                        "runtime_seconds": 0.0,
+                        "images": [],
+                    }
+                script_path = tmp_py_path
                 cmd = ["python3", script_path]
                 used_octave = False
 
@@ -183,9 +219,22 @@ class OctaveRunner:
             # Octave başarısız olursa Python'a geri düş
             if used_octave and exit_code != 0:
                 try:
-                    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-                        f.write(code_to_run)
-                        script_path = f.name
+                    tmp_py_path = tempfile.NamedTemporaryFile(
+                        mode="w", suffix=".py", delete=False
+                    ).name
+                    try:
+                        write_file(tmp_py_path, code_to_run, mode="text", overwrite=True)
+                    except Exception as e:
+                        logger.error(f"Python script dosyası yazılamadı: {str(e)}")
+                        return {
+                            "success": False,
+                            "stdout": "",
+                            "stderr": str(e),
+                            "exit_code": -1,
+                            "runtime_seconds": 0.0,
+                            "images": [],
+                        }
+                    script_path = tmp_py_path
                     cmd = ["python3", script_path]
                     proc = subprocess.run(
                         cmd,
