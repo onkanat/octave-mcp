@@ -1,4 +1,4 @@
-theme: jekll-theme-minima
+theme: jekyll-theme-minima
 title: "OctaveMCP"
 description: "GNU Octave MCP Server with FastMCP + FastAPI"
 
