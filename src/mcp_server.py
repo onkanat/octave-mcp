@@ -134,5 +134,52 @@ def main() -> None:
     mcp.run()
 
 
+def _print_lmstudio_suggestions() -> None:
+    """Print two LM Studio mcp JSON suggestions:
+    1) Portable: use the console-script name `octave-mcp` (works for pip installs)
+    2) Absolute: full command using current python and repo src path (useful for local dev)
+    This function is non-invasive: it only prints to stdout and does not change behavior.
+    """
+    import json
+    from pathlib import Path
+
+    repo_root = Path.cwd().resolve()
+    portable = {
+        "mcpServers": {
+            "octave_execute": {
+                "command": "octave-mcp",
+                "args": [],
+                "env": {"MCP_RUNS_ROOT": "runs"},
+            }
+        }
+    }
+
+    import sys
+
+    absolute = {
+        "mcpServers": {
+            "octave_execute": {
+                "command": sys.executable,
+                "args": [str(repo_root / "src" / "mcp_server.py")],
+                "env": {"MCP_RUNS_ROOT": str(repo_root / "runs")},
+            }
+        }
+    }
+
+    print(
+        "\n=== LM Studio MCP suggestions (copy-paste into LM Studio or encode as deeplink) ===\n"
+    )
+    print("--- Portable (use if you've installed octave-mcp via pip) ---")
+    print(json.dumps(portable, indent=2, ensure_ascii=False))
+    print("\n--- Absolute (use for local dev / if LM Studio cannot find console-script) ---")
+    print(json.dumps(absolute, indent=2, ensure_ascii=False))
+    print("\n=================================================================\n")
+
+
 if __name__ == "__main__":
+    try:
+        _print_lmstudio_suggestions()
+    except Exception:
+        # Do not block server startup on suggestion printing errors
+        pass
     main()
