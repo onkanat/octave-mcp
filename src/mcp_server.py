@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import os
 from base64 import b64encode
+import argparse
+import threading
+import logging
 from typing import Annotated, Any, Dict, List, Optional
+
+_LOG = logging.getLogger(__name__)
 
 from mcp.server.fastmcp import FastMCP
 
@@ -134,6 +139,31 @@ def main() -> None:
     mcp.run()
 
 
+def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thread | None:
+    """Start the FastAPI HTTP endpoints in a background thread using uvicorn.
+
+    Returns the Thread if started, otherwise None (uvicorn not available).
+    """
+    try:
+        import uvicorn
+    except Exception:
+        _LOG.warning("uvicorn not installed; HTTP API will not be started")
+        return None
+
+    cfg = uvicorn.Config("src.api.endpoints:app", host=host, port=port, log_level="info")
+    server = uvicorn.Server(cfg)
+
+    def run_server() -> None:
+        try:
+            server.run()
+        except Exception:
+            _LOG.exception("HTTP server failed")
+
+    thread = threading.Thread(target=run_server, daemon=True)
+    thread.start()
+    return thread
+
+
 def _print_lmstudio_suggestions() -> None:
     """Print two LM Studio mcp JSON suggestions:
     1) Portable: use the console-script name `octave-mcp` (works for pip installs)
@@ -166,7 +196,10 @@ def _print_lmstudio_suggestions() -> None:
         }
     }
 
-    print("\n=== LM Studio MCP suggestions (copy-paste into LM Studio or encode as deeplink) ===\n")
+    print(
+        "\n=== LM Studio MCP suggestions (copy-paste into LM Studio "
+        "or encode as deeplink) ===\n"
+    )
     print("--- Portable (use if you've installed octave-mcp via pip) ---")
     print(json.dumps(portable, indent=2, ensure_ascii=False))
     print("\n--- Absolute (use for local dev / if LM Studio cannot find console-script) ---")
@@ -175,9 +208,49 @@ def _print_lmstudio_suggestions() -> None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Run OctaveMCP servers (MCP STDIO and optional HTTP API)"
+    )
+    parser.add_argument(
+        "--no-http",
+        action="store_true",
+        help="Do not start HTTP API (only STDIO)",
+    )
+    parser.add_argument(
+        "--http-host",
+        default="127.0.0.1",
+        help="HTTP API bind host",
+    )
+    parser.add_argument(
+        "--http-port",
+        type=int,
+        default=8000,
+        help="HTTP API bind port",
+    )
+    parser.add_argument(
+        "--transport",
+        default="stdio",
+        choices=["stdio", "sse", "streamable-http"],
+        help="FastMCP transport to run (default: stdio)",
+    )
+    args = parser.parse_args()
+
     try:
         _print_lmstudio_suggestions()
     except Exception:
         # Do not block server startup on suggestion printing errors
         pass
-    main()
+
+    http_thread = None
+    if not args.no_http:
+        http_thread = _start_http_api(host=args.http_host, port=args.http_port)
+
+    # Run the MCP transport (blocking)
+    mcp.run(transport=args.transport)
+
+    # If HTTP server was started, join thread briefly to keep process alive until mcp.run exits
+    if http_thread is not None and http_thread.is_alive():
+        try:
+            http_thread.join(0)
+        except Exception:
+            pass
