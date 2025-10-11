@@ -12,6 +12,39 @@ Bu belge MCP stdio köprüsündeki araçların (tools) parametrelerini, dönüş
   python src/mcp_server.py
   ```
 
+### LM Studio Universal Config (v0.3.1)
+
+Aşağıdaki konfigürasyon, script ve modül modlarında sorunsuz çalışır.
+Import/path sorunlarını sunucu otomatik olarak ele alır:
+
+```json
+{
+  "mcpServers": {
+    "octave_execute": {
+      "command": "/path/to/octave-mcp/.venv/bin/python",
+      "args": [
+        "/path/to/octave-mcp/src/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}",
+        "MCP_RUNS_ROOT": "/path/to/octave-mcp/runs",
+        "TMPDIR": "/path/to/octave-mcp/runs",
+        "OCTAVE_RUNNER_MODE": "python",
+        "MCP_IS_VISION_MODEL": "false",
+        "MCP_RATE_LIMIT_MAX": "100",
+        "MCP_RATE_LIMIT_WINDOW": "60",
+        "MCP_MAX_OUTPUT_CHARS": "20000",
+        "MCP_TIMEOUT_SECONDS": "10",
+        "MCP_CPU_LIMIT": "0",
+        "MCP_MEMORY_MB": "0",
+        "MCP_RUNS_RETENTION_DAYS": "0"
+      }
+    }
+  }
+}
+```
+
 ## Tool: `octave_run`
 
 - Açıklama: Octave veya Python ile kod çalıştırır; stdout/stderr ve görselleri döndürür.

@@ -103,13 +103,15 @@ ekledim: `mcp_command.json` (repo kökünde). Dosya, bu projenin tipik çalışm
 ayarlandı — lütfen kendi çalışma dizininize göre `command` ve `args` içindeki absolute yolları
 güncelleyin.
 
+### Doğru LM Studio komut-tabanlı MCP config örneği
+
 Özellikle kontrol etmeniz gerekenler (manuel düzenleme gerekirse):
 
 - `command` — virtualenv içindeki Python yürütülebilirinin tam yolu veya pip'in yüklediği `octave-mcp` console-script adı.
 - `args` — `src/mcp_server.py` dosyasının absolute yolu (yalnızca `python` yerine -m kullanmıyorsanız).
 - `env` — `MCP_RUNS_ROOT`, `TMPDIR`, zaman aşımı ve resource limitleri gibi ortam değişkenleri.
 
-Önerilen akış (taşınabilir kullanım):
+...existing code...
 
 1. Eğer kullanıcılar paketi `pip install octave-mcp` ile kuruyorsa, LM Studio komut olarak doğrudan
   `octave-mcp` console-script'ini çağırabilir. Bu durum için repo kökünde `mcp_command.json` taşınabilir bir

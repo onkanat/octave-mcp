@@ -1,5 +1,14 @@
 # Release Notes
 
+## v0.3.1 (2025-10-11)
+
+Universal LM Studio config ve import path düzeltmeleri:
+
+- MCP server, modül ya da script olarak çalıştırıldığında otomatik `sys.path` yamalama ile
+  import sorunlarını kendisi çözer.
+- Türkçe ve İngilizce dokümanlar universal LM Studio config örneği ile güncellendi.
+- API ve MCP Tools dokümanları v0.3.1 sürüm bilgileriyle senkronize edildi.
+
 ## v0.2.5 (2025-10-11)
 
 **CLI İyileştirmesi:**

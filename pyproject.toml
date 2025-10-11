@@ -17,7 +17,7 @@ profile = "black"
 
 [project]
 name = "octave-mcp"
-version = "0.3.0"
+version = "0.3.1"
 requires-python = ">=3.11"
 description = "OctaveMCP: Secure GNU Octave code execution via MCP with FastMCP + FastAPI"
 readme = "README.md"

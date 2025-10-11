@@ -1,4 +1,4 @@
-# Octave MCP Server v0.2.5
+# Octave MCP Server v0.3.1
 
 [English Version](./en/index.md)
 
@@ -13,7 +13,7 @@ Yerel Octave kurulumunuz üzerinde güvenli komut çalıştıran bir MCP sunucus
 - **Figür yakalama**: PNG görsellerini otomatik toplama ve HTML'e gömme
 - **Rate limiting**: HTTP API için istek sınırlandırması
 
-## v0.3.0 Migration Rehberi & Backward Compatibility
+## v0.3.1 Migration Rehberi & Backward Compatibility
 
 Bu sürümde (v0.3.0) kod tabanı tamamen modern Python standartlarına göre yeniden yazıldı. API ve hata yanıtlarında standard error block şeması zorunlu hale geldi. Test altyapısı ve CI/CD pipeline güncellendi.
 
@@ -29,13 +29,44 @@ Bu sürümde (v0.3.0) kod tabanı tamamen modern Python standartlarına göre ye
 - Legacy client’lar için hata ayrıştırıcılarının güncellenmesi gerekebilir.
 - Ortam değişkenleri ve config dosyaları v0.2.x ile uyumlu.
 
-### Migration Adımları
+### Migration Admlar
 
-1. Tüm client ve entegrasyonlarda hata yanıtı ayrıştırıcılarını yeni şemaya göre güncelleyin.
-2. Ortam değişkenlerini ve config dosyalarını aşağıdaki örneklere göre kontrol edin.
-3. Test ve CI/CD pipeline’ını yeni kod tabanına göre yeniden çalıştırın.
-4. API endpoint’lerini ve parametrelerini docs/API.md ve docs/en/API.md’den doğrulayın.
+1. Tm client ve entegrasyonlarda hata yant ayrtrclarn yeni emaya gre gncelleyin.
+2. Ortam deikenlerini ve config dosyalarn aadaki rneklere gre kontrol edin.
+3. Test ve CI/CD pipelinen yeni kod tabanna gre yeniden altrn.
+4. API endpointlerini ve parametrelerini docs/API.md ve docs/en/API.mdden dorulayn.
 5. MCP araçlarını yeni parametrelerle test edin.
+6. LM Studio universal config örneğini kullanın:
+
+```json
+{
+  "mcpServers": {
+    "octave_execute": {
+      "command": "/path/to/octave-mcp/.venv/bin/python",
+      "args": [
+        "/path/to/octave-mcp/src/mcp_server.py"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:${PATH}",
+        "MCP_RUNS_ROOT": "/path/to/octave-mcp/runs",
+        "TMPDIR": "/path/to/octave-mcp/runs",
+        "OCTAVE_RUNNER_MODE": "python",
+        "MCP_IS_VISION_MODEL": "false",
+        "MCP_RATE_LIMIT_MAX": "100",
+        "MCP_RATE_LIMIT_WINDOW": "60",
+        "MCP_MAX_OUTPUT_CHARS": "20000",
+        "MCP_TIMEOUT_SECONDS": "10",
+        "MCP_CPU_LIMIT": "0",
+        "MCP_MEMORY_MB": "0",
+        "MCP_RUNS_RETENTION_DAYS": "0"
+      }
+    }
+  }
+}
+```
+
+Bu config hem doğrudan script hem modül olarak çalıştırmada sorunsuzdur. Tüm import ve path sorunları otomatik çözülür.
 
 ### Kırılım Noktaları
 

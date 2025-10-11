@@ -1,6 +1,17 @@
 
 # Changelog
 
+## v0.3.1 (2025-10-11)
+
+Öne çıkanlar:
+
+- Universal LM Studio config ve import patch ile tüm çalışma modlarında sorunsuz başlatma.
+- Tüm dokümantasyonlarda (TR/EN) config örnekleri ve migration rehberi güncellendi.
+- MCP server artık modül veya script olarak çalıştırıldığında otomatik import path çözümü yapıyor.
+- API, MCP tools ve hata şeması dokümanları senkronize edildi.
+
+---
+
 ## v0.3.0 (2025-10-11)
 
 Öne çıkanlar:

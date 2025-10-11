@@ -1,32 +1,21 @@
 from __future__ import annotations
-
+import sys
+import os
 import argparse
 import logging
-import os
 import threading
 from base64 import b64encode
 from typing import Annotated, Any, Dict, List, Optional
-
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from mcp.server.fastmcp import FastMCP
+from services.cleanup_service import CleanupService
+from services.grabcode_service import GrabcodeService
+from services.octave_runner import OctaveRunner
+from services.publish_service import PublishService
+from utils.config import get_env_int, get_env_str
+from utils.resource_limits import ResourceLimiter
 
 _LOG = logging.getLogger(__name__)
-
-try:
-    # When imported as a package (recommended): `import src.mcp_server`
-    from .services.cleanup_service import CleanupService
-    from .services.grabcode_service import GrabcodeService
-    from .services.octave_runner import OctaveRunner
-    from .services.publish_service import PublishService
-    from .utils.config import get_env_int, get_env_str
-    from .utils.resource_limits import ResourceLimiter
-except Exception:
-    # When executed as a script: `python src/mcp_server.py` (local dev)
-    from services.cleanup_service import CleanupService  # type: ignore
-    from services.grabcode_service import GrabcodeService  # type: ignore
-    from services.octave_runner import OctaveRunner  # type: ignore
-    from services.publish_service import PublishService  # type: ignore
-    from utils.config import get_env_int, get_env_str  # type: ignore
-    from utils.resource_limits import ResourceLimiter  # type: ignore
 
 mcp = FastMCP("octave_mcp")
 

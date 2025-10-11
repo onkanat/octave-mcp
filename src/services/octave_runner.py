@@ -5,7 +5,9 @@ import tempfile
 import time
 from typing import Dict
 from utils.file_io import write_file
-from utils.logging import logger
+from utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class OctaveRunner:
@@ -97,7 +99,6 @@ class OctaveRunner:
                     "stderr": validation_error,
                     "exit_code": -1,
                     "runtime_seconds": 0.0,
-                    "images": [],
                 }
 
             # Temizlenmiş kodu kullan
