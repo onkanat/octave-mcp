@@ -166,9 +166,7 @@ def _print_lmstudio_suggestions() -> None:
         }
     }
 
-    print(
-        "\n=== LM Studio MCP suggestions (copy-paste into LM Studio or encode as deeplink) ===\n"
-    )
+    print("\n=== LM Studio MCP suggestions (copy-paste into LM Studio or encode as deeplink) ===\n")
     print("--- Portable (use if you've installed octave-mcp via pip) ---")
     print(json.dumps(portable, indent=2, ensure_ascii=False))
     print("\n--- Absolute (use for local dev / if LM Studio cannot find console-script) ---")

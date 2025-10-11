@@ -103,7 +103,6 @@ ekledim: `mcp_command.json` (repo kökünde). Dosya, bu projenin tipik çalışm
 ayarlandı — lütfen kendi çalışma dizininize göre `command` ve `args` içindeki absolute yolları
 güncelleyin.
 
-
 Özellikle kontrol etmeniz gerekenler (manuel düzenleme gerekirse):
 
 - `command` — virtualenv içindeki Python yürütülebilirinin tam yolu veya pip'in yüklediği `octave-mcp` console-script adı.
