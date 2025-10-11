@@ -14,10 +14,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Install project and dev deps
         run: |
           python -m pip install --upgrade pip
           pip install -e .[dev]
+      - name: Lint (black/isort/flake8)
+        run: |
+          black --check .
+          isort --check-only .
+          flake8 .
+      - name: Typecheck (mypy)
+        run: |
+          mypy src
       - name: Run curated tests
         run: |
           python -m pytest \
@@ -33,6 +48,13 @@ jobs:
             tests/contract/test_publish_post.py \
             tests/contract/test_grabcode_post.py \
             -q --disable-warnings --maxfail=1 --tb=no --cov-fail-under=0
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            htmlcov
       - name: Generate OpenAPI JSON
         run: |
           python scripts/generate_openapi.py
@@ -41,3 +63,11 @@ jobs:
         with:
           name: openapi-schema
           path: artifacts/openapi.json
+      - name: Generate API docs (pdoc)
+        run: |
+          python scripts/generate_api_docs.py
+      - name: Upload API docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs
+          path: artifacts/docs
