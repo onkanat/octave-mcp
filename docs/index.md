@@ -60,6 +60,14 @@ python src/mcp_server.py
 uvicorn src/api/endpoints:app --reload
 ```
 
+Note: As a convenience `python src/mcp_server.py` now starts both the MCP STDIO
+server and the HTTP API (uvicorn) in the same process. If you only want the
+STDIO server, run:
+
+```bash
+python src/mcp_server.py --no-http
+```
+
 ## Documentation
 
 - 📖 [**README**](./README.md) - Detailed setup and usage
