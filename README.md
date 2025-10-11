@@ -10,7 +10,10 @@ Secure GNU Octave code execution via MCP with FastMCP + FastAPI architecture.
 
 ```sh
 pip install octave-mcp
-octave-mcp
+# MCP server için:
+python -m src.mcp_server
+# CLI kullanım için:
+octave-mcp --help
 ```
 
 ### Option 2: One-line installer
@@ -28,7 +31,11 @@ cd octave-mcp
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python src/mcp_server.py
+pip install -e .
+# Start MCP server:
+octave-mcp
+# Or module approach:
+python -m mcp_server
 ```
 
 ## Requirements

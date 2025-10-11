@@ -1,4 +1,4 @@
-# OctaveMCP API v0.2.0
+# OctaveMCP API v0.2.5
 
 [Türkçe](./README.md) · [English](./en/API.md)
 

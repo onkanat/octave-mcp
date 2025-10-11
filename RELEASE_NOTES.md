@@ -1,5 +1,37 @@
 # Release Notes
 
+## v0.2.5 (2025-10-11)
+
+**CLI İyileştirmesi:**
+
+- Console script artık CLI modülünü (`cli.cli:main`) kullanır
+- `octave-mcp` komutu yüklendikten sonra doğrudan çalışır
+
+## v0.2.4 (2025-10-11)
+
+**Entry Point Düzeltmesi:**
+
+- Console script entry point `octave-mcp` artık doğru modül yolunu kullanır
+- Paket kurulduktan sonra ModuleNotFoundError sorunu çözüldü
+
+## v0.2.3 (2025-10-11)
+
+**Paket Yapılandırması:**
+
+- Top-level modülün kesin olarak dahil edilmesi için yapılandırma düzeltildi
+
+## v0.2.2 (2025-10-11)
+
+**Import Uyumluluğu:**
+
+- Top-level import uyumluluğu için `octave_mcp` shim eklendi
+
+## v0.2.1 (2025-10-11)
+
+**Hata Düzeltmeleri:**
+
+- Küçük hata düzeltmeleri, formatlama ve CI yapılandırma iyileştirmeleri
+
 ## v0.2.0 (2025-09-17)
 
 Öne çıkanlar:

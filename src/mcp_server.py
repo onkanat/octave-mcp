@@ -146,7 +146,53 @@ def tool_cleanup(
 
 
 def main() -> None:
-    mcp.run()
+    """Entry point for MCP server console script."""
+    parser = argparse.ArgumentParser(
+        description="Run OctaveMCP servers (MCP STDIO and optional HTTP API)"
+    )
+    parser.add_argument(
+        "--no-http",
+        action="store_true",
+        help="Do not start HTTP API (only STDIO)",
+    )
+    parser.add_argument(
+        "--http-host",
+        default="127.0.0.1",
+        help="HTTP API bind host",
+    )
+    parser.add_argument(
+        "--http-port",
+        type=int,
+        default=8000,
+        help="HTTP API bind port",
+    )
+    parser.add_argument(
+        "--transport",
+        default="stdio",
+        choices=["stdio", "sse", "streamable-http"],
+        help="FastMCP transport to run (default: stdio)",
+    )
+    args = parser.parse_args()
+
+    try:
+        _print_lmstudio_suggestions()
+    except Exception:
+        # Do not block server startup on suggestion printing errors
+        pass
+
+    http_thread = None
+    if not args.no_http:
+        http_thread = _start_http_api(host=args.http_host, port=args.http_port)
+
+    # Run the MCP transport (blocking)
+    mcp.run(transport=args.transport)
+
+    # If HTTP server was started, join thread briefly to keep process alive until mcp.run exits
+    if http_thread is not None and http_thread.is_alive():
+        try:
+            http_thread.join(0)
+        except Exception:
+            pass
 
 
 def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thread | None:
@@ -183,7 +229,16 @@ def _start_http_api(host: str = "127.0.0.1", port: int = 8000) -> threading.Thre
 
     def run_server() -> None:
         try:
-            cmd = [sys.executable, "-m", "uvicorn", "src.api.endpoints:app", "--host", host, "--port", str(port)]
+            cmd = [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "src.api.endpoints:app",
+                "--host",
+                host,
+                "--port",
+                str(port),
+            ]
             _LOG.info("Starting uvicorn subprocess: %s", " ".join(cmd))
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             # Attach proc to thread for potential inspection

@@ -3,7 +3,9 @@ import sys
 
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+# Add src to path so we can import from src directory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 from api.endpoints import app  # noqa: E402
 
 

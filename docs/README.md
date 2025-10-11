@@ -1,4 +1,4 @@
-# Octave MCP Server v0.2.0
+# Octave MCP Server v0.2.5
 
 [English Version](./en/index.md)
 
@@ -62,7 +62,8 @@ python src/cli/cli.py grabcode --session_id s1
 ### Publish: HTML’de Figür Gömme
 
 - `publish` çağrısı, `runs/<session_id>/published/` altında `script_publish.html` dosyasını üretir.
-- Son çalıştırmadan bulunan `fig*.png` görselleri `runs/<session_id>/published/images/` dizinine kopyalanır ve HTML içine `<img>` olarak eklenir.
+- Son çalıştırmadan bulunan `fig*.png` görselleri `runs/<session_id>/published/images/`
+  dizinine kopyalanır ve HTML içine `<img>` olarak eklenir.
 - Publish yanıtında `images` alanı göreli yolları içerir (ör. `images/fig_1.png`).
 
 ```sh
@@ -148,7 +149,8 @@ export OCTAVE_FIG_HEIGHT=480
 - MCP aracı `admin_cleanup` da aynı parametreleri destekler:
   - `dry_run` (bool), `force` (bool), `max_age_hours` (int), `max_age_days` (int), `session_id` (str)
 
-Politika uyarısı: `force: true` isteği, ortamda `MCP_ALLOW_FORCE_DELETE=true` değilse engellenir ve anlamlı bir hata yanıtı döner.
+Politika uyarısı: `force: true` isteği, ortamda `MCP_ALLOW_FORCE_DELETE=true` değilse
+engellenir ve anlamlı bir hata yanıtı döner.
 
 Standart hata bloğu şeması için bkz: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
 
@@ -246,7 +248,8 @@ which octave
 export MCP_ALLOW_FORCE_DELETE=true
 ```
 
-- Figür görünmüyor: Kod gerçekten bir figür üretiyor mu? Octave modunda çalıştırmayı deneyin ve `runs/<session>/published/images/` altında `fig_*.png` oluştuğunu doğrulayın.
+- Figür görünmüyor: Kod gerçekten bir figür üretiyor mu? Octave modunda çalıştırmayı
+  deneyin ve `runs/<session>/published/images/` altında `fig_*.png` oluştuğunu doğrulayın.
 
 ```sh
 export OCTAVE_RUNNER_MODE=octave
@@ -286,7 +289,8 @@ source .venv/bin/activate
 python scripts/mcp_demo_flow.py
 ```
 
-Bu betik örnek kodu publish eder, ardından grabcode ile geri alır ve `octave_run` aracını `images_b64=true` ile çağırıp görsel çıktıları base64 olarak da gösterir.
+Bu betik örnek kodu publish eder, ardından grabcode ile geri alır ve `octave_run` aracını
+`images_b64=true` ile çağırıp görsel çıktıları base64 olarak da gösterir.
 
 Alternatif olarak hızlı bir kontrol betiği:
 

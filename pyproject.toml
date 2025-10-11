@@ -8,9 +8,6 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.setuptools]
-py-modules = ["octave_mcp"]
-
 [tool.black]
 line-length = 99
 
@@ -66,6 +63,11 @@ dev = [
 ]
 
 [project.scripts]
-octave-mcp = "cli.cli:main"
+octave-mcp = "mcp_server:main"
+octave-mcp-cli = "cli.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 

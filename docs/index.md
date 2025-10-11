@@ -4,7 +4,7 @@
 
 [Türkçe Dokümantasyon](./README.md) · [English](./en/index.md)
 
-**Version**: 0.2.0 | **Tech Stack**: FastMCP + FastAPI + GNU Octave
+**Version**: 0.2.5 | **Tech Stack**: FastMCP + FastAPI + GNU Octave
 
 ## Overview
 

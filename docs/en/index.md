@@ -6,7 +6,7 @@
 
 Welcome! This is the English documentation for OctaveMCP.
 
-- Project version: 0.2.0
+- Project version: 0.2.5
 - Tech stack: FastMCP + FastAPI + GNU Octave
 
 ## Overview
