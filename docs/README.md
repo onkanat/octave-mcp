@@ -13,7 +13,45 @@ Yerel Octave kurulumunuz üzerinde güvenli komut çalıştıran bir MCP sunucus
 - **Figür yakalama**: PNG görsellerini otomatik toplama ve HTML'e gömme
 - **Rate limiting**: HTTP API için istek sınırlandırması
 
-## Kurulum
+## v0.3.0 Migration Rehberi & Backward Compatibility
+
+Bu sürümde (v0.3.0) kod tabanı tamamen modern Python standartlarına göre yeniden yazıldı. API ve hata yanıtlarında standard error block şeması zorunlu hale geldi. Test altyapısı ve CI/CD pipeline güncellendi.
+
+### Kritik Değişiklikler
+
+- Hata yanıtı formatı: Tüm endpoint’ler artık standard error block ile dönüyor (bkz: docs/ERROR_SCHEMA.md)
+- Global MCPException handler ile hata yanıtları tutarlı ve ayrıştırılabilir.
+- Ortam değişkenleri ve config parametreleri v0.2.x ile uyumlu, yeni eklenenler aşağıda listelenmiştir.
+
+### Geriye Dönük Uyumluluk
+
+- Eski endpoint ve parametreler korunmaya çalışıldı, ancak hata yanıtı formatı değişti.
+- Legacy client’lar için hata ayrıştırıcılarının güncellenmesi gerekebilir.
+- Ortam değişkenleri ve config dosyaları v0.2.x ile uyumlu.
+
+### Migration Adımları
+
+1. Tüm client ve entegrasyonlarda hata yanıtı ayrıştırıcılarını yeni şemaya göre güncelleyin.
+2. Ortam değişkenlerini ve config dosyalarını aşağıdaki örneklere göre kontrol edin.
+3. Test ve CI/CD pipeline’ını yeni kod tabanına göre yeniden çalıştırın.
+4. API endpoint’lerini ve parametrelerini docs/API.md ve docs/en/API.md’den doğrulayın.
+5. MCP araçlarını yeni parametrelerle test edin.
+
+### Kırılım Noktaları
+
+- Hata yanıtı formatı değişti, eski tipler/alanlar kaldırıldı veya yeniden adlandırıldı.
+- OpenAPI şemasında hata yanıtı örnekleri güncellendi.
+
+### Test ve Doğrulama
+
+- Tüm unit, integration ve contract testleri v0.3.0 kodu ile yeşil.
+- Coverage ana modüllerde yüksek, legacy/utility dosyalarda opsiyonel.
+
+### Legacy Client Dönüştürücü Snippet
+
+Eski client’lar için örnek hata yanıtı dönüştürücü snippet’leri docs/API.md’de sunulmuştur.
+
+---
 
 ```sh
 python3 -m venv .venv

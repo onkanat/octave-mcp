@@ -127,21 +127,60 @@ Eski session'ları ve run klasörlerini temizler.
 - Headers: `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 - Environment: `MCP_RATE_LIMIT_MAX`, `MCP_RATE_LIMIT_WINDOW`
 
-## Error Responses
 
-Tüm endpoint'ler standart hata formatı kullanır:
+## v0.3.0 Migration Notları & Hata Yanıtı Örnekleri
+
+### Yeni Hata Yanıtı Formatı
+
+Tüm endpoint’ler artık aşağıdaki gibi standard error block ile dönüyor:
 
 ```json
 {
   "success": false,
   "error": {
     "id": "uuid",
-    "type": "timeout|resource_violation|validation_error",
+    "type": "timeout|resource_violation|validation_error|service_error|execution_error|not_found_error|resource_error|security_error",
     "message": "Error description",
     "hint": "Suggested fix",
-    "timestamp": "2025-10-10T12:00:00Z"
+    "timestamp": "2025-10-10T12:00:00Z",
+    "details": {
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Error details",
+      "timeout_seconds": 10,
+      "resource_type": "memory",
+      "resource_id": "session_123"
+    },
+    "resource_violation": {
+      "limit_type": "memory",
+      "limit_value": 512,
+      "observed_value": 1024
+    }
   }
 }
 ```
 
-Detaylı hata şeması için: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
+Detaylı şema için: [ERROR_SCHEMA.md](./ERROR_SCHEMA.md)
+
+### Legacy Client Dönüştürücü Snippet
+
+Eski client’lar için örnek hata yanıtı dönüştürücü:
+
+```python
+def convert_error_block(error):
+    # v0.2.x formatından v0.3.0 standard error block'a dönüştürme
+    return {
+        "id": error.get("id"),
+        "type": error.get("type"),
+        "message": error.get("message"),
+        "hint": error.get("hint"),
+        "timestamp": error.get("timestamp"),
+        "details": error.get("details", {}),
+        "resource_violation": error.get("resource_violation", {})
+    }
+```
+
+### Migration Notları
+
+v0.3.0 ile gelen tüm endpoint ve parametre değişiklikleri docs/README.md ve bu dosyada güncellenmiştir.
+
