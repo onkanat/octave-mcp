@@ -31,7 +31,51 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**Constitution Version**: 1.1.0 (Last updated: 2025-10-13)
+
+### Core Principles Compliance
+
+- [ ] **I. Modularity**: Feature designed as independent, testable module?
+- [ ] **II. CLI & API**: Both interfaces planned (if applicable)?
+- [ ] **III. Test-First (TDD)**: Tests will be written first, RED-GREEN-REFACTOR?
+- [ ] **IV. Integration & Contract Tests**: API/MCP tool contracts defined?
+- [ ] **V. Observability & Versioning**: Logging strategy, semantic versioning?
+- [ ] **VI. MCP Protocol**: Core feature exposed as MCP tool (if applicable)?
+- [ ] **VII. Error Handling**: ERROR_SCHEMA.md compliance planned?
+- [ ] **VIII. Bilingual Docs**: TR/EN documentation planned?
+- [ ] **IX. Import Path**: Module/script execution modes supported?
+
+### Detailed Gate Checks
+
+#### MCP Protocol Integration (if feature adds/modifies MCP tools)
+
+- [ ] Tool name follows snake_case convention (e.g., `octave_run`)
+- [ ] Tool parameters have type annotations and descriptions
+- [ ] LM Studio config example will be provided
+- [ ] Contract test for MCP tool interface planned
+- [ ] Transport modes (STDIO/SSE) considered
+
+#### Error Handling
+
+- [ ] All error paths will use MCPException with ERROR_SCHEMA.md format
+- [ ] Error types identified (runtime_error, timeout, resource_violation, etc.)
+- [ ] Resource violations will populate resource_violation block
+- [ ] HTTP 4xx/5xx responses will include error block
+
+#### Bilingual Documentation
+
+- [ ] Feature documentation planned in both TR and EN
+- [ ] API endpoint docs will exist in `docs/API.md` and `docs/en/API.md`
+- [ ] Migration guide (if breaking changes) in both languages
+
+#### Testing Strategy
+
+- [ ] Unit tests: Coverage target ≥80% for core modules
+- [ ] Integration tests: Critical flows identified
+- [ ] Contract tests: API/MCP tool schemas validated
+- [ ] CI/CD: Coverage tracking enabled
+
+**Notes**: Document any principle violations with justification. Breaking changes require migration plan.
 
 ## Project Structure
 

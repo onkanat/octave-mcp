@@ -89,10 +89,32 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
 - [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
 - [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+- [ ] T016 [US1] Add validation and error handling (Principle VII: ERROR_SCHEMA.md compliance)
+- [ ] T017 [US1] Add structured logging for user story 1 operations (Principle V)
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+### Error Handling for User Story 1 (Principle VII) ⚠️
+
+- [ ] T018 [US1] Define error scenarios and map to ERROR_SCHEMA.md types
+- [ ] T019 [P] [US1] Implement MCPException handlers for each error type
+- [ ] T020 [P] [US1] Add resource_violation blocks for limit breaches
+- [ ] T021 [US1] Test error block format in unit tests
+
+### MCP Tool Integration for User Story 1 (if applicable - Principle VI) 🔧
+
+- [ ] T022 [P] [US1] Define MCP tool in src/mcp_server.py with @mcp.tool decorator
+- [ ] T023 [P] [US1] Add type annotations and descriptions for all parameters
+- [ ] T024 [US1] Implement tool logic calling existing service
+- [ ] T025 [P] [US1] Add LM Studio config example to docs/MCP_TOOLS.md
+- [ ] T026 [US1] Contract test for MCP tool schema in tests/contract/test_mcp_[tool].py
+
+### Bilingual Documentation for User Story 1 (Principle VIII) 📚
+
+- [ ] T027 [P] [US1] Write feature documentation in Turkish (docs/[feature].md)
+- [ ] T028 [P] [US1] Translate documentation to English (docs/en/[feature].md)
+- [ ] T029 [P] [US1] Update API.md with new endpoints (both TR/EN)
+- [ ] T030 [US1] Add usage examples in both languages
+
+**Checkpoint**: At this point, User Story 1 should be fully functional, documented in both languages, and testable independently
 
 ---
 

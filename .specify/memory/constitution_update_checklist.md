@@ -35,10 +35,51 @@ Anayasa (`/memory/constitution.md`) güncellendiğinde, tüm bağlı dokümanlar
 - [ ] Loglama ve hata izleme gereksinimleri şablonlara eklenmeli
 - [ ] Sürüm formatı ve değişiklik özeti zorunluluğu belirtilmeli
 - [ ] YAGNI ve sadelik ilkeleri örneklenmeli
+- [ ] Structured logging örnekleri güncellenmiş mi?
+- [ ] Semantic versioning kuralları tüm dokümanlarda tutarlı mı?
+
+#### VI. MCP Protocol Integration (v1.1.0'da eklendi)
+
+- [ ] FastMCP ile tool tanımlama örnekleri şablonlara eklenmeli
+- [ ] MCP tool naming convention (snake_case) vurgulanmalı
+- [ ] LM Studio universal config örnekleri güncellenmiş mi?
+- [ ] Her MCP tool için contract test gereksinimleri belirtilmeli
+- [ ] MCP transport modes (STDIO, SSE) dokümante edilmeli
+- [ ] Tool parameter types ve descriptions standartları eklenmeli
+
+#### VII. Standardized Error Handling (v1.1.0'da eklendi)
+
+- [ ] ERROR_SCHEMA.md referansları tüm şablonlara eklenmeli
+- [ ] Error block format örnekleri güncellenmiş mi?
+- [ ] Resource violation tracking örnekleri eklenmiş mi?
+- [ ] HTTP 4xx/5xx ve MCP tool error handling tutarlı mı?
+- [ ] Error type enum değerleri dokümante edilmiş mi?
+- [ ] MCPException kullanımı örneklenmiş mi?
+
+#### VIII. Bilingual Documentation (v1.1.0'da eklendi)
+
+- [ ] Tüm yeni özellik dokümantasyonu TR/EN olarak planlanmış mı?
+- [ ] API dokümantasyonu her iki dilde senkronize mi?
+- [ ] Migration guide'lar çift dilde hazırlanmış mı?
+- [ ] GitHub Pages yapılandırması güncel mi?
+- [ ] Dokümantasyon şablonları bilingual requirement içeriyor mu?
+- [ ] Çapraz referanslar her iki dilde çalışıyor mu?
+
+#### IX. Import Path Resolution (v1.1.0'da eklendi)
+
+- [ ] Module ve script execution mode örnekleri eklenmiş mi?
+- [ ] pyproject.toml entry points dokümante edilmiş mi?
+- [ ] LM Studio compatibility notları güncel mi?
+- [ ] Import path resolution stratejisi açıklanmış mı?
+- [ ] Development ve production execution mode'ları belgelenmiş mi?
+- [ ] sys.path manipulation'dan kaçınma örnekleri verilmiş mi?
 
 #### Güvenlik ve Performans
+
 - [ ] Resource limit, sandbox, rate limit ve otomatik temizlik kuralları şablonlara eklenmeli
 - [ ] Vektörizasyon, grafik optimizasyonu ve paket yönetimi örnekleri güncellenmeli
+- [ ] Resource violation error reporting örnekleri eklenmiş mi?
+- [ ] MCP_* environment variables dokümante edilmiş mi?
 
 ## Doğrulama Adımları
 
@@ -67,9 +108,24 @@ Anayasa (`/memory/constitution.md`) güncellendiğinde, tüm bağlı dokümanlar
 
 ## Şablon Senkronizasyon Durumu
 
-Son kontrol: 2025-09-17
-- Anayasa sürümü: 1.0.0
-- Şablonlar uyumlu: ✅
+Son kontrol: 2025-10-13
+
+- Anayasa sürümü: 1.1.0
+- Şablonlar uyumlu: ⚠️ VI-IX ilkeleri için güncelleme gerekli
+
+### Değişiklik Geçmişi
+
+#### v1.1.0 (2025-10-13)
+
+- ✅ Yeni ilkeler VI-IX eklendi
+- ✅ Checklist güncellemesi tamamlandı
+- ⚠️ Template örnekleri güncellenmeli
+- ⚠️ MCP tool validation checklist oluşturulmalı
+
+#### v1.0.1 (2025-10-11)
+
+- ✅ İlk anayasa placeholder'lar dolduruldu
+- ✅ Şablonlar temel ilkelerle uyumlu
 
 ---
 
